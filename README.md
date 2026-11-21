@@ -1,6 +1,10 @@
 <p align="center">
-  <img src="screenshots/index1.png" alt="Tyranor Next" width="900" />
+  <img src="screenshots/m3-redesign/10-home-final.png" alt="Tyranor Next MD" width="360" />
 </p>
+
+# Tyranor Next · Material 3 Edition
+
+> 这是 [Tyranor Next](https://github.com/Weiss-UltimateSavior/Tyranor-Next) 的社区 fork，把全部界面重做为 **Material 3**。功能、引擎支持与兼容边界与上游一致；APK 见 [Releases](https://github.com/ssbx5972/Tyranor-Next-MD/releases)。
 
 基于 **Tyranor 模拟器逆向重写** 的多引擎视觉小说（Galgame）模拟器，面向 Android 平台。具体功能与兼容边界见 [SPEC.md](SPEC.md)。
 
@@ -9,30 +13,23 @@ iOS版本计划中...  鸿蒙设备可使用卓易通安装
 
 企鹅群：364439133   感谢 [@安音](https://www.pixiv.net/users/8182248) 为本项目绘画的logo娘！
 
-默认主题界面（浅色）
-<p align="center">
-  <img src="screenshots/index2.png" alt="Tyranor Next" width="900" />
-</p>
+## Material 3 界面
 
-三种不同风格主题（不包含深浅色模式对比）
-<p align="center">
-  <img src="screenshots/index3.png" alt="Tyranor Next" width="900" />
-</p>
+- 由「色调轮盘」的种子色生成完整 Material 3 配色（浅色 / 深色），统一 background / surfaceContainer / primary / secondary / tertiary / error 等语义色
+- 标准 M3 组件：NavigationBar / NavigationRail、TopAppBar、Card、列表行、Slider、Switch、OutlinedTextField 搜索框、DropdownMenu、AlertDialog、ModalBottomSheet
+- 全部界面图标使用 Material Icons：导航与标签选中 Filled、未选中 Outlined
+- 已移除 Miuix、液态玻璃 / 白雾玻璃外观与旧导航样式，设置项同步精简
+- 保留原有引擎、扫描、启动、存档、封面等全部功能与数据格式
 
-多种个性化设置（部分展示）
-<p align="center">
-  <img src="screenshots/index4.png" alt="Tyranor Next" width="900" />
-</p>
+| 首页 | 游戏库 | 设置 |
+| --- | --- | --- |
+| <img src="screenshots/m3-redesign/10-home-final.png" width="240" /> | <img src="screenshots/m3-redesign/11-games-final.png" width="240" /> | <img src="screenshots/m3-redesign/08-settings-icons.png" width="240" /> |
 
-更多拓展功能（部分展示，第三方插件支持见 [docs/第三方APK运行时模块接入指南.md](docs/第三方APK运行时模块接入指南.md)）
-<p align="center">
-  <img src="screenshots/index5.png" alt="Tyranor Next" width="900" />
-</p>
+| 应用设置 | 底部抽屉 | 引擎 / 工具 |
+| --- | --- | --- |
+| <img src="screenshots/m3-redesign/03-app-settings.png" width="240" /> | <img src="screenshots/m3-redesign/09-scan-dir-sheet.png" width="240" /> | <img src="screenshots/m3-redesign/05-engine.png" width="240" /> |
 
-画面超分（展示配置）
-<p align="center">
-  <img src="screenshots/index6.png" alt="Tyranor Next" width="900" />
-</p>
+更多拓展功能与第三方插件支持见 [docs/第三方APK运行时模块接入指南.md](docs/第三方APK运行时模块接入指南.md)。
 
 ## 感谢各位贡献者们！一起成为光吧！
 
@@ -119,9 +116,12 @@ iOS版本计划中...  鸿蒙设备可使用卓易通安装
 ```bash
 # 编译 Debug APK
 ./gradlew assembleDebug --no-daemon
+
+# 编译 Release APK（无 CI 签名时回退到 debug 签名）
+./gradlew assembleRelease --no-daemon
 ```
 
-产物位于 `app/build/outputs/apk/debug/`。需要 Android SDK（本地平台 `android-37.0`）环境。
+产物分别位于 `app/build/outputs/apk/debug/` 与 `app/build/outputs/apk/release/`。需要 Android SDK（本地平台 `android-37.0`）环境。可以直接从 [Releases](https://github.com/ssbx5972/Tyranor-Next-MD/releases) 下载已构建的 APK。
 
 CI 使用 JDK 17；还需 engine 的 Android 36 平台、Build Tools 37.0.0、NDK 28.0.13004108 与 CMake 3.22.1。Windows 使用 `./gradlew.bat`。JVM 回归运行 `./gradlew testDebugUnitTest --no-daemon`，完整检查命令与设备验收边界见 [AGENTS.md](AGENTS.md#构建)。普通 Gradle 构建使用已提交的运行库，不自动重编所有原生引擎。
 
@@ -132,7 +132,7 @@ app/
 ├── src/main/java/com/tyranor/next/
 │   ├── core/      功能抽象层：扫描、启动、引擎模块、封面、游玩状态、存档、补丁、拆封包、配置、授权、网络（各域共享 HTTP 层）、更新
 │   ├── ui/        界面 UI 交互层：主界面、游戏页、设置页、弹窗、公共组件
-│   └── theme/     Compose / Miuix 主题、色调、深浅色适配
+│   └── theme/     Compose / Material 3 主题、种子色配色、深浅色适配
 ├── src/main/assets/rtp/    App 自有 RTP 资源
 ├── src/main/nativeplugins/ 插件 manifest 与 app-only 插件源头
 ├── build/generated/assets/ 构建生成的 engine/ 共享脚本与 nativeplugins/ 插件资产（.zip.xz）
@@ -156,7 +156,7 @@ docs/、.archify/                     专题方案、审查记录与可视化
 
 本项目基于 **GNU General Public License v2.0** 发布（GPL-2.0-only），详见 [LICENSE](LICENSE)。
 
-`engine/` 引擎运行时基于 Tyranor 模拟器逆向重写，上游涉及 Kirikiroid2 / ONScripter 等 GPL-2.0 项目，因此整个项目以 GPL-2.0 分发；衍生作品须遵循 GPL-2.0 条款，并随发行物提供完整源码。Miuix 等第三方依赖按各自许可证引入；代码/资产级第三方声明汇总见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+`engine/` 引擎运行时基于 Tyranor 模拟器逆向重写，上游涉及 Kirikiroid2 / ONScripter 等 GPL-2.0 项目，因此整个项目以 GPL-2.0 分发；衍生作品须遵循 GPL-2.0 条款，并随发行物提供完整源码。第三方依赖按各自许可证引入；代码/资产级第三方声明汇总见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 | 运行库 | 上游 | 许可证 | 溯源与许可文本 |
 | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ System4 运行时包含 libjpeg-turbo；依 IJG 许可要求，随分发文档�
 - [xsystem35-sdl2](https://github.com/kichikuou/xsystem35-sdl2)（GPL-2.0-or-later）：AliceSoft System 3.x 引擎的开源重实现（SDL2 移植），System35 运行时；依赖 [SDL2](https://github.com/libsdl-org/SDL) / [SDL2_mixer](https://github.com/libsdl-org/SDL_mixer)（zlib）、[freetype](https://freetype.org/)（FTL/GPLv2）、[libwebp](https://chromium.googlesource.com/webm/libwebp)（BSD-3-Clause）
 - [xsystem4](https://github.com/nunuhara/xsystem4) 与 [libsys4](https://github.com/nunuhara/libsys4)（GPL-2.0-or-later）：AliceSoft System 4 引擎的开源重实现及其底层库，System4 运行时；Android 构建参考 [xsystem4-android](https://github.com/kichikuou/xsystem4-android)（kichikuou），仅作事实参考。依赖 [libsndfile](https://github.com/kichikuou/libsndfile)（LGPL-2.1-or-later，`xsystem4` 分支）等，见「许可证」
 - **RinneMobile**：游戏扫描识别/SAF路径映射逻辑/独立存档映射/krkrsdl3 等多个功能的参考与实现
-- [Miuix](https://github.com/compose-miuix-ui/miuix)：设置界面组件库
+- [Material Icons](https://fonts.google.com/icons)（Apache-2.0）：界面图标
 - [Anime4K](https://github.com/bloc97/Anime4K):（bloc97，MIT）：KRKR 游戏画面实时超分（线条重建 CNN 着色器）
 - [OnscripterYuri](https://github.com/YuriSizuku/OnscripterYuri): ONS引擎
 - [UsefulUnpack](https://github.com/znso4pa/usefulunpack)（znso4pa，MIT）：XP3 / KSD 解封包 Rust 实现（`engine/rust` 的 `lib.rs` / `common.rs` / `ksd.rs` 来源，许可证见 `engine/rust/LICENSE.usefulunpack`）
