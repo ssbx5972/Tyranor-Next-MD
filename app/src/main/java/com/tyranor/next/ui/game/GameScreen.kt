@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.game
 
+import com.tyranor.next.ui.common.AppIcons
+
 import com.tyranor.next.ui.common.motion.CoverSurface
 import com.tyranor.next.ui.common.motion.CoverReveal
 import com.tyranor.next.ui.common.motion.listItemMotion
@@ -104,6 +106,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
@@ -126,7 +129,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import top.yukonga.miuix.kmp.basic.RadioButton
+import androidx.compose.material3.RadioButton
 import com.tyranor.next.R
 import com.tyranor.next.core.cover.CoverErrorCode
 import com.tyranor.next.core.cover.CoverImageCache
@@ -481,7 +484,7 @@ private fun GameLibraryContent(
                         Modifier
                             .fillMaxWidth()
                             // 筛选按钮固定在搜索栏右侧，并与顶栏刷新按钮右对齐。
-                            .padding(start = 4.dp, end = 16.dp, bottom = 10.dp),
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
@@ -512,7 +515,7 @@ private fun GameLibraryContent(
                     },
                 ) {
                     TopBarIcon(
-                        painterResource(R.drawable.ic_game_add),
+                        AppIcons.add,
                         stringResource(R.string.game_add_content_description),
                         MaterialTheme.colorScheme.primary,
                     ) { addGameStep = AddGameStep.CHOICE }
@@ -540,7 +543,7 @@ private fun GameLibraryContent(
                                 )
                             }
                         } else {
-                            TopBarIcon(painterResource(R.drawable.ic_game_cover), stringResource(R.string.game_scrape_covers_content_description), MaterialTheme.colorScheme.primary) {
+                            TopBarIcon(AppIcons.collections, stringResource(R.string.game_scrape_covers_content_description), MaterialTheme.colorScheme.primary) {
                                 if (scanning) coverRejects++
                                 syncMissingCovers()
                             }
@@ -559,7 +562,7 @@ private fun GameLibraryContent(
                             .shakeOnTrigger(scanRejects, amplitude = 4.dp)
                             .breathing(scanning),
                     ) {
-                    TopBarIcon(painterResource(R.drawable.ic_game_scan), stringResource(R.string.game_scan_content_description), MaterialTheme.colorScheme.primary) {
+                    TopBarIcon(AppIcons.scan, stringResource(R.string.game_scan_content_description), MaterialTheme.colorScheme.primary) {
                         if (scanning || scrapingCovers) scanRejects++
                         refreshGames()
                     }
@@ -694,7 +697,7 @@ private fun GameFilterActionIcon(
 ) {
     Box(contentAlignment = Alignment.TopEnd) {
         TopBarIcon(
-            painterResource(R.drawable.ic_game_filter),
+            AppIcons.filter,
             stringResource(R.string.game_filter_content_description),
             MaterialTheme.colorScheme.primary,
             stateDescription = if (isActive) stringResource(R.string.game_filter_state_active) else null,
@@ -762,7 +765,7 @@ private data class DrawerAction(
     val key: String,
     val title: String,
     val summary: String? = null,
-    val icon: Int,
+    val icon: ImageVector,
     val showArrow: Boolean = false,
     val iconTint: Color? = null,
     /** 行尾内联文本：与标题同行右对齐单行显示（不新增条目高度）。 */
@@ -1174,7 +1177,7 @@ internal fun GameActionsSheet(
                         modifier = Modifier
                             .gameSheetEntrance(2)
                             .bounceOnChange(game.launchFile ?: "", depth = 0.05f),
-                        leadingIcon = R.drawable.ic_sheet_launch_file,
+                        leadingIconVector = AppIcons.play,
                         containerColor = drawerItemSurface,
                         verticalPadding = 17.dp,
                         showArrow = false,
@@ -1191,7 +1194,7 @@ internal fun GameActionsSheet(
                     DrawerAction(
                         key = "search_cover",
                         title = drawerSearchCoverTitle,
-                        icon = R.drawable.ic_sheet_search_cover,
+                        icon = AppIcons.imageSearch,
                         iconTint = drawerPrimaryColor,
                         onClick = { if (!isBatchScrapingActive()) showCoverSourcePicker = true },
                     ),
@@ -1200,7 +1203,7 @@ internal fun GameActionsSheet(
                     DrawerAction(
                         key = "play_status",
                         title = drawerPlayStatusTitle,
-                        icon = R.drawable.ic_sheet_play_status_entry,
+                        icon = AppIcons.playStatus,
                         iconTint = drawerPrimaryColor,
                         trailingText = playStatusSummary,
                         onClick = { showPlayStatusDialog = true },
@@ -1213,7 +1216,7 @@ internal fun GameActionsSheet(
                         DrawerAction(
                             key = "save_management",
                             title = drawerSaveManagementTitle,
-                            icon = R.drawable.ic_sheet_saves,
+                            icon = AppIcons.save,
                             showArrow = true,
                             iconTint = drawerPrimaryColor,
                             onClick = {
@@ -1229,7 +1232,7 @@ internal fun GameActionsSheet(
                         DrawerAction(
                             key = "confirm_external_exit",
                             title = drawerExternalExitTitle,
-                            icon = R.drawable.ic_sheet_saves,
+                            icon = AppIcons.save,
                             showArrow = true,
                             iconTint = drawerPrimaryColor,
                             onClick = {
@@ -1246,7 +1249,7 @@ internal fun GameActionsSheet(
                             key = "runtime_capability_status",
                             title = if (runtimeRefreshRunning) runtimeCapabilityLoadingTitle else runtimeCapabilityRetryTitle,
                             summary = if (runtimeRefreshFailed) runtimeCapabilityUnavailableSummary else null,
-                            icon = R.drawable.ic_sheet_settings,
+                            icon = AppIcons.settings,
                             iconTint = drawerPrimaryColor,
                             onClick = {
                                 if (!runtimeRefreshRunning) scope.launch {
@@ -1272,7 +1275,7 @@ internal fun GameActionsSheet(
                         DrawerAction(
                             key = "online_patch",
                             title = drawerOnlinePatchTitle,
-                            icon = R.drawable.ic_sheet_patch,
+                            icon = AppIcons.extension,
                             showArrow = true,
                             iconTint = drawerPrimaryColor,
                             onClick = {
@@ -1291,7 +1294,7 @@ internal fun GameActionsSheet(
                         DrawerAction(
                             key = "engine_settings",
                             title = drawerEngineSettingsTitle,
-                            icon = R.drawable.ic_sheet_settings,
+                            icon = AppIcons.settings,
                             showArrow = true,
                             iconTint = drawerPrimaryColor,
                             onClick = {
@@ -1309,7 +1312,7 @@ internal fun GameActionsSheet(
                         summary = action.summary,
                         modifier = Modifier.gameSheetEntrance(3 + index),
                         trailingText = action.trailingText,
-                        leadingIcon = action.icon,
+                        leadingIconVector = action.icon,
                         containerColor = drawerItemSurface,
                         verticalPadding = 17.dp,
                         showArrow = action.showArrow,
@@ -1508,7 +1511,7 @@ private fun CoverSourcePickerDialog(
                         // 来源条目在弹窗正文块内再逐条错峰升起（行程短于正文块，避免叠加过猛）
                         modifier = Modifier.staggeredEntrance(1 + index, distance = 8.dp, stepMillis = 45L),
                         onClick = if (selectable) ({ onSelect(source) }) else null,
-                        leadingIcon = R.drawable.ic_cover_source,
+                        leadingIconVector = AppIcons.collections,
                         // 弹窗条目自足禁用按压反馈（AGENTS.md 弹窗点击反馈统一规范）
                         indication = null,
                         // 弹窗内条目必须与亮面板形成反差（AGENTS.md 弹窗条目约定）

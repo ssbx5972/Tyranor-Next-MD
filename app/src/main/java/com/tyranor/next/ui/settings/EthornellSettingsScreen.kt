@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,8 +33,8 @@ import com.tyranor.next.ui.common.TopBarIcon
 import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.motion.staggeredEntrance
 import androidx.compose.foundation.layout.Box
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Scaffold as Scaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 import kotlinx.coroutines.launch
 import com.tyranor.next.ui.common.notice.AppNotice
 
@@ -75,7 +77,7 @@ internal fun EthornellSettingsScreen() {
                     background = Color.Transparent,
                     contentColor = PageTextColor,
                     trailing = {
-                        TopBarIcon(painterResource(R.drawable.ic_save), stringResource(R.string.engine_settings_save_content_description), MiuixTheme.colorScheme.primary) {
+                        TopBarIcon(AppIcons.save, stringResource(R.string.engine_settings_save_content_description), MiuixTheme.colorScheme.primary) {
                             EngineSettingsStore.setEthornellNls(context, nls)
                             EngineSettingsStore.setEthornellFont(context, font)
                             AppNotice.makeText(context, R.string.engine_settings_saved, Toast.LENGTH_SHORT).show()

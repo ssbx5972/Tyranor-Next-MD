@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -91,15 +94,15 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.ColorPicker
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3ColorWheel
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.Slider
-import top.yukonga.miuix.kmp.basic.SliderDefaults
+import com.tyranor.next.ui.common.SliderDefaults
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.OverlayDropdownPreference
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 
 /** 应用设置页 Activity：入口见设置页「应用设置」项。 */
 class AppSettingsActivity : AppScreenActivity() {
@@ -240,14 +243,14 @@ internal fun AppSettingsScreen() {
                                     Box(
                                         modifier = Modifier
                                             .padding(end = 6.dp)
-                                            .bounceOnChange(AppThemeColors.primary)
+                                            .bounceOnChange(MaterialTheme.colorScheme.primary)
                                             .size(24.dp)
                                             .clip(CircleShape)
-                                            .background(AppThemeColors.primary),
+                                            .background(MaterialTheme.colorScheme.primary),
                                     )
                                 },
                                 endActions = {
-                                    BlurCrossfade(targetState = AppThemeColors.primary.toHex()) { hex ->
+                                    BlurCrossfade(targetState = MaterialTheme.colorScheme.primary.toHex()) { hex ->
                                         Text(
                                             hex,
                                             style = MaterialTheme.typography.bodyMedium,
@@ -346,31 +349,6 @@ internal fun AppSettingsScreen() {
                                 },
                             )
                             }
-                            SwitchPreference(
-                                title = stringResource(R.string.settings_default_theme_particles),
-                                checked = defaultThemeParticlesEnabled,
-                                onCheckedChange = { checked ->
-                                    AppSettingsStore.setDefaultThemeParticlesEnabled(ctx, checked)
-                                },
-                            )
-                            val particleStyles = DefaultThemeParticleStyle.entries
-                            OverlayDropdownPreference(
-                                title = stringResource(R.string.settings_default_theme_particle_style),
-                                items = particleStyles.map { style ->
-                                    stringResource(
-                                        when (style) {
-                                            DefaultThemeParticleStyle.RISING_BUBBLES -> R.string.settings_particles_rising_bubbles
-                                            DefaultThemeParticleStyle.BUTTON_WATERFALL -> R.string.settings_particles_button_waterfall
-                                        },
-                                    )
-                                },
-                                selectedIndex = particleStyles.indexOf(defaultThemeParticleStyle),
-                                onSelectedIndexChange = { index ->
-                                    particleStyles.getOrNull(index)?.let { style ->
-                                        AppSettingsStore.setDefaultThemeParticleStyle(ctx, style)
-                                    }
-                                },
-                            )
                         }
                     }
                 }
@@ -521,77 +499,6 @@ internal fun AppSettingsScreen() {
                                         },
                                     )
                                 }
-                            }
-                        }
-                    }
-                }
-                stagedItem(5, staged) {
-                    MiuixCard(modifier = Modifier.pressSquishGroup().staggeredEntrance(5).fillMaxWidth().glassBorder(), cornerRadius = AppComponentCornerRadius) {
-                        Column(Modifier.padding(vertical = 4.dp)) {
-                            // 三个外观主题在未显式选择时统一使用液态玻璃 · 经典。
-                            // 「透镜」档需要 Android 13+ 的 RuntimeShader，低版本不提供该选项（列表里不出现）。
-                            val navStyleOptions = buildList {
-                                add(
-                                    AppSettingsStore.NAV_STYLE_CLASSIC_MD to
-                                        stringResource(R.string.settings_nav_bar_classic_md),
-                                )
-                                add(
-                                    AppSettingsStore.NAV_STYLE_LIQUID_GLASS to
-                                        stringResource(R.string.settings_nav_bar_liquid_glass),
-                                )
-                                if (AppSettingsStore.supportsLiquidGlassEnhanced) {
-                                    add(
-                                        AppSettingsStore.NAV_STYLE_LIQUID_GLASS_ENHANCED to
-                                            stringResource(R.string.settings_nav_bar_liquid_glass_enhanced),
-                                    )
-                                }
-                                if (AppSettingsStore.FLOATING_NAV_ENABLED) {
-                                    add(
-                                        AppSettingsStore.NAV_STYLE_FLOATING_BUTTON to
-                                            stringResource(R.string.settings_nav_bar_floating_button),
-                                    )
-                                }
-                            }
-                            val navStyleIndex = navStyleOptions
-                                .indexOfFirst { it.first == navStyle }
-                                .coerceAtLeast(0)
-                            OverlayDropdownPreference(
-                                title = stringResource(R.string.settings_nav_bar_title),
-                                // 说明只保留「安卓版本提醒」：经典 MD 无需提醒（任何版本可用）
-                                summary = when {
-                                    // 平板侧栏布局：液态玻璃两档不参与侧栏适配，提示实际以侧栏显示
-                                    railLayout && navStyle != AppSettingsStore.NAV_STYLE_CLASSIC_MD ->
-                                        stringResource(R.string.settings_nav_bar_desc_rail)
-                                    navStyle == AppSettingsStore.NAV_STYLE_LIQUID_GLASS ->
-                                        stringResource(R.string.settings_nav_bar_desc_liquid_glass)
-                                    navStyle == AppSettingsStore.NAV_STYLE_LIQUID_GLASS_ENHANCED ->
-                                        stringResource(R.string.settings_nav_bar_desc_enhanced)
-                                    navStyle == AppSettingsStore.NAV_STYLE_FLOATING_BUTTON ->
-                                        stringResource(R.string.settings_nav_bar_desc_floating_button)
-                                    else -> null
-                                },
-                                items = navStyleOptions.map { it.second },
-                                selectedIndex = navStyleIndex,
-                                onSelectedIndexChange = { index ->
-                                    navStyleOptions.getOrNull(index)?.first?.let { style ->
-                                        AppSettingsStore.setNavStyle(ctx, style)
-                                    }
-                                },
-                            )
-                            // 悬浮按钮支持长按拖动；拖动后可用此项一键回右下角
-                            ExpandVisibility(visible = navStyle == AppSettingsStore.NAV_STYLE_FLOATING_BUTTON) {
-                                ArrowPreference(
-                                    // 落点反馈：点按后整行轻弹一下，表示已复位（不涉及导航栏本身的任何动效）
-                                    modifier = Modifier.bounceOnChange(
-                                        floatingNavResetTick.takeIf { it > 0 },
-                                        depth = 0.05f,
-                                    ),
-                                    title = stringResource(R.string.settings_nav_bar_reset_position),
-                                    onClick = {
-                                        AppSettingsStore.setFloatingNavPosition(ctx, 1f, 1f)
-                                        floatingNavResetTick++
-                                    },
-                                )
                             }
                         }
                     }
@@ -864,7 +771,7 @@ private fun HomeWebUrlDialog(
                         modifier = Modifier.staggeredEntrance(index + 1, distance = 10.dp, stepMillis = 40L),
                         title = stringResource(title),
                         summary = summaryOf(url),
-                        leadingIcon = R.drawable.ic_web_link,
+                        leadingIconVector = AppIcons.link,
                         containerColor = DialogItemSurface,
                         showArrow = false,
                         indication = null,
@@ -878,7 +785,7 @@ private fun HomeWebUrlDialog(
                     } else {
                         stringResource(R.string.settings_home_web_custom_summary)
                     },
-                    leadingIcon = R.drawable.ic_sheet_rename,
+                    leadingIconVector = AppIcons.rename,
                     containerColor = DialogItemSurface,
                     indication = null,
                 ) { onCustom() }
@@ -935,7 +842,7 @@ private fun HomeWebCustomUrlDialog(
                             invalid = false
                         },
                         onSearch = confirm,
-                        leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                        leadingIconVector = AppIcons.rename,
                         iconContentDescription = stringResource(R.string.settings_home_web_custom),
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Uri,
@@ -990,9 +897,13 @@ private fun ColorPickerDialog(
         title = { Text(stringResource(R.string.settings_color_wheel), style = MaterialTheme.typography.titleMedium) },
         text = {
             Column {
-                ColorPicker(
+                M3ColorWheel(
                     color = pickerColor,
                     onColorChanged = { pickerColor = it },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .widthIn(max = 260.dp)
+                        .fillMaxWidth(),
                 )
                 ExpandVisibility(visible = invalid) {
                     Text(

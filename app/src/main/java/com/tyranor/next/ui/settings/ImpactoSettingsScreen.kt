@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,8 +52,8 @@ import com.tyranor.next.ui.common.motion.pressSquish
 import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.motion.staggeredEntrance
 import com.tyranor.next.ui.common.notice.AppNotice
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Scaffold as Scaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 
 /**
  * MAGES. 引擎（impacto 宿主）全局设置：宿主安装状态 + 引擎在 Android 上有意义的用户配置项，
@@ -82,7 +84,7 @@ internal fun ImpactoSettingsScreen() {
                     contentColor = PageTextColor,
                     trailing = {
                         TopBarIcon(
-                            painterResource(R.drawable.ic_save),
+                            AppIcons.save,
                             stringResource(R.string.engine_settings_save_content_description),
                             MiuixTheme.colorScheme.primary,
                         ) {

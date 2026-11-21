@@ -43,6 +43,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +72,7 @@ import com.tyranor.next.theme.NavWhite
 import com.tyranor.next.theme.UnselectedGrey
 import com.tyranor.next.theme.glassBorder
 import com.tyranor.next.theme.glassPageBackground
+import com.tyranor.next.ui.common.AppIcons
 import com.tyranor.next.ui.common.LiquidGlassNavItem
 import com.tyranor.next.ui.common.AppAlertDialog
 import com.tyranor.next.ui.common.AppNavigationRail
@@ -98,8 +100,6 @@ import com.tyranor.next.ui.common.glass.GlassBottomBarSpec
 import com.tyranor.next.ui.common.glass.rememberGlassBottomBarColors
 import com.tyranor.next.theme.WithoutPressIndication
 import com.tyranor.next.theme.AppComponentShape
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils
 import com.tyranor.next.ui.engine.EngineScreen
 import com.tyranor.next.ui.game.GameScreen
 import com.tyranor.next.ui.home.HomeScreen
@@ -126,19 +126,20 @@ import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.collectSettingAsState
 import com.tyranor.next.ui.common.notice.AppNotice
 
-// 底部导航栏 Tab 定义
+// 底部导航栏 Tab 定义（Material Icons：选中 Filled / 未选中 Outlined）
 @Immutable
 private data class Tab(
   @StringRes val labelRes: Int,
-  val iconRes: Int,
+  val icon: ImageVector,
+  val unselectedIcon: ImageVector,
 )
 
 private val tabItems = listOf(
-  Tab(R.string.nav_home, R.drawable.ic_home),
-  Tab(R.string.nav_games, R.drawable.ic_game),
-  Tab(R.string.nav_engine, R.drawable.ic_module),
-  Tab(R.string.nav_tools, R.drawable.ic_nav_tools),
-  Tab(R.string.nav_settings, R.drawable.ic_settings),
+  Tab(R.string.nav_home, AppIcons.home, AppIcons.homeOutlined),
+  Tab(R.string.nav_games, AppIcons.game, AppIcons.gameOutlined),
+  Tab(R.string.nav_engine, AppIcons.module, AppIcons.moduleOutlined),
+  Tab(R.string.nav_tools, AppIcons.tools, AppIcons.toolsOutlined),
+  Tab(R.string.nav_settings, AppIcons.settings, AppIcons.settingsOutlined),
 )
 
 /** 托管五个主标签页及根 Miuix 浮层；透明且零 inset 的宿主让菜单遮罩覆盖底栏。 */
@@ -226,7 +227,7 @@ fun MainScreen(
       }
     }
   }
-  val navStyle = effectiveNavStyle()
+  // Material 3 统一导航：底部 NavigationBar / 平板 NavigationRail，不再有液态玻璃与悬浮导航形态。
   // 页面级返回处理后注册，仍优先处理网页历史和浮层关闭。
   val hostActivity = AppLocaleController.findActivity(context)
   BackHandler { hostActivity?.leaveMainScreen() }
@@ -252,25 +253,15 @@ fun MainScreen(
       )
     }
   }
-  // 首页样式：Web 首页参与绘制期间底栏改用仅背景采样源（见 webHomeInvolved）
+  // 首页样式：Web 首页与原生首页由 HomeScreen 自行切换
   val homeStyle by AppSettingsStore.homeStyleState.collectSettingAsState()
-  // 液态玻璃两档共用同一套宿主准备（录制采样层、转场重定向、底部留白）
-  val liquidGlass = navStyle == AppSettingsStore.NAV_STYLE_LIQUID_GLASS ||
-    navStyle == AppSettingsStore.NAV_STYLE_LIQUID_GLASS_ENHANCED
-  val enhanceLiquidGlass = navStyle == AppSettingsStore.NAV_STYLE_LIQUID_GLASS_ENHANCED
-  // 平板/大窗口：主导航移到侧边。侧栏按外观风格取「默认导航栏」形态，
-  // 液态玻璃两档（尤其透镜）不参与侧栏适配，平板下自动落到主题默认形态。
-  val floatingButtonStyle = navStyle == AppSettingsStore.NAV_STYLE_FLOATING_BUTTON
-  val railLayout = isSideRailLayout() && !floatingButtonStyle
-  val liquidBottomActive = liquidGlass && !railLayout
-  // 悬浮导航在手机、平板共用圆球交互，安全区与扇形尺寸由组件自适应。
-  val floatingButtonActive = floatingButtonStyle && !railLayout
-  val floatingNavOutsideTapBridge = remember { FloatingNavOutsideTapBridge() }
-  val floatingNavOutsideTapObserver = remember(floatingNavOutsideTapBridge) {
-    Modifier.observeFloatingNavOutsideTaps(floatingNavOutsideTapBridge)
-  }
-  // 玻璃外观风格 + 默认导航样式：导航栏改为悬浮的圆角玻璃条（描边 + 玻璃底）
-  val floatingDefaultNav = AppThemeColors.isGlass && !liquidGlass && !floatingButtonStyle && !railLayout
+  // 平板/大窗口：主导航移到侧边（M3 NavigationRail），否则使用 M3 NavigationBar。
+  val railLayout = isSideRailLayout()
+  val liquidBottomActive = false
+  val floatingButtonActive = false
+  val floatingDefaultNav = false
+  val bottomBackdropActive = false
+  val enhancedBarActive = false
   // 可见 Tab：关闭首页后首页不参与导航（游戏页成为第一页）
   val visibleTabEntries = remember(homePageEnabled) {
     tabItems.mapIndexedNotNull { index, tab ->
@@ -281,23 +272,16 @@ fun MainScreen(
   // remember(tabLabels)：labels 内容不变时复用同一份 items，避免每次重组都给增强栏传新 List
   // （增强栏据此跳过重组，进而避免 drawBackdrop 元素被判不等而重建 RenderEffect 管线）
   val liquidGlassTabItems = remember(tabLabels) {
-    visibleTabEntries.mapIndexed { index, entry -> LiquidGlassNavItem(tabLabels[index], entry.second.iconRes) }
+    visibleTabEntries.mapIndexed { index, entry ->
+      LiquidGlassNavItem(
+        label = tabLabels[index],
+        icon = entry.second.icon,
+        unselectedIcon = entry.second.unselectedIcon,
+      )
+    }
   }
   // 导航组件内部使用「可见条目下标」，选中值需从页面下标换算
   val selectedNavIndex = visibleTabEntries.indexOfFirst { it.first == activeIndex }.coerceAtLeast(0)
-
-  // 采样层可用条件：液态玻璃两档或悬浮按钮（底栏形态）
-  val backdropSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-  val bottomBackdropActive = (liquidBottomActive || floatingButtonActive) &&
-    backdropSupported
-  // 悬浮按钮的采样层是否真的挂载（API < 31 时组件退实底，无需背景复制）
-  val floatingButtonBackdrop = floatingButtonActive && bottomBackdropActive
-  // 透镜档**是否真的会渲染**：设置选了它 + 采样层可用 + 本机 AGSL 可用。
-  // 后者是运行期探测（见 GlassShaderSupport）：API 33+ 但 AGSL 编译异常的机器上，
-  // Backdrop 内部的 RuntimeShader 会在布局期抛出并崩掉整个主界面，此时退回经典档更安全。
-  // 注意：回退时经典档也会被要求不传 Highlight，否则兜底路径自己仍依赖 RuntimeShader。
-  val enhancedBarActive = enhanceLiquidGlass && liquidBottomActive && bottomBackdropActive &&
-    GlassShaderSupport.isRuntimeShaderUsable
 
   val pageTransition = updateTransition(targetState = activeIndex, label = "mainTabTransition")
   val tabMotion = rememberMainTabMotion(pageTransition, tabItems.size, onboarding = coachPage != null)
@@ -340,98 +324,9 @@ fun MainScreen(
   val onSelectNavPage: (Int) -> Unit = { navIndex ->
     visibleTabEntries.getOrNull(navIndex)?.let { selectPage(it.first) }
   }
-  // 外层只负责布局：内容区 + 底部导航栏（不用 Scaffold，避免与子页顶部栏的 inset 冲突）
-  // 透明、零 inset 的最外层 Miuix Scaffold 只用来托管浮层：各标签页里的下拉菜单等 Miuix 浮层默认渲染到最外层 Scaffold，
-  // 放在这里后浮层与其背景变暗盖住整个屏幕（含底部导航栏），而不是夹在页面与底栏之间、让底栏单独亮着。
-  // 浮层内容在这里组合，故宿主套同一个 MiuixSettingsTheme，配色与原先在设置页内渲染时一致。
-  MiuixScaffold(
-    modifier = Modifier.fillMaxSize(),
-    popupHost = { MiuixSettingsTheme { MiuixPopupUtils.MiuixPopupHost() } },
-    containerColor = Color.Transparent,
-    contentWindowInsets = WindowInsets(0.dp),
-  ) { _ ->
-  Box(
-    modifier.fillMaxSize()
-      .then(if (floatingButtonActive) floatingNavOutsideTapObserver else Modifier),
-  ) {
-    // 内容层录制进 backdrop，供液态玻璃导航采样页面内容。
-    // 关键：背景必须在 layerBackdrop 之后（内层）——layerBackdrop 只录制它之后的内容，
-    // 放在外层（Surface/Column 背景）的内容不会被采样，玻璃会采到透明而漏出文字。
-    val backdrop = rememberLayerBackdrop()
-    // Web 首页场景的「仅背景」采样层（见下方 webHomeInvolved）：只含页面背景、不含页面内容，
-    // 避免 WebView 被录进采样层并逐帧离屏重放。
-    val backgroundBackdrop = rememberLayerBackdrop()
-    // 采样修复（报告 §5.3 / §8.4 第 1 条）：玻璃外观风格下 PageGrey 透明，根部背景在采样层之外，
-    // 透镜档把同一份背景画进被采样内容，保证采样源含完整背景且坐标同源。
-    // remember：MainScreen 在切页动画期间每帧重组，复用同一 Modifier 才不会每帧重建绘制缓存。
-    val accent = AppThemeColors.primary
-    val pageBackground = remember(accent) {
-      Modifier.glassPageBackground(accent)
-    }
-    // 玻璃系需要把页面背景并入采样源的场景（增强透镜 / 悬浮按钮）；
-    // 平板侧栏不适用（导航在侧边，不采样内容层）。
-    val glassSamplingBackground = AppThemeColors.isGlass &&
-      (enhancedBarActive || floatingButtonBackdrop)
-    // ===== Web 首页采样降级（防切页闪烁） =====
-    // Web 首页参与绘制（前台，或转场起点/终点）时底栏不得采样内容层：layerBackdrop 每个绘制帧
-    // 把内容重新录进采样层，而 Compose 的 AndroidView（WebView）经 view.draw 一并入录，底栏/透镜
-    // 重放即让 Chromium 把同一帧多次画进不同离屏 FBO。真机实测透镜档每次切页都触发
-    // `tile memory limits exceeded, some content may not draw`，网页内容被丢弃而抖动闪烁。
-    // 该场景改用仅含页面背景的 backgroundBackdrop：Web 首页在 glassNavBottomInset() 下留有底部
-    // 空白，导航栏底下本来就只有页面背景，采样内容零视觉价值；Web 首页不再参与绘制后立即恢复。
-    // currentState/targetState 只在转场起止变化（currentState 保持起点直到转场结束），不逐帧重组。
-    val homeInTransition = activeIndex == 0 || pageTransition.currentState == 0 || pageTransition.targetState == 0
-    // 「增强」动效档允许转场途中转向（首页→游戏→引擎）：转向时 currentState 会变成上一个目标，首页其实还在淡出，
-    // 必须保持「首页参与绘制」直到转场完全停下，否则底栏会提前改采内容层，把 WebView 录进采样层而闪烁
-    var homeLatched by remember { mutableStateOf(false) }
-    // 只以 homeInTransition 作为 key：isRunning 不在组合期读取，转场起止不再触发 MainScreen 重组；
-    // 首页离开时等到转场真正停下（snapshotFlow 读取的是当前值，已停下则立即继续）再解除锁存。
-    LaunchedEffect(homeInTransition) {
-      if (homeInTransition) {
-        homeLatched = true
-      } else {
-        snapshotFlow { pageTransition.isRunning }.first { !it }
-        homeLatched = false
-      }
-    }
-    val webHomeInvolved = bottomBackdropActive &&
-      homeStyle == AppSettingsStore.HOME_STYLE_WEB &&
-      (homeInTransition || (MotionMode.enhanced && homeLatched))
-    // 底栏采样源：Web 首页参与绘制时为仅背景层，其余为内容层（两者同一坐标空间，可直接替换）。
-    val navBackdrop = if (webHomeInvolved) backgroundBackdrop else backdrop
-    // 仅背景层：只在 Web 首页参与绘制时挂载，供底栏采样（其余情况由根部 GlassBackground 绘制，
-    // 避免同一份动画背景在根层与内容层各跑一遍）。
-    if (webHomeInvolved) {
-      Box(
-        Modifier
-          .fillMaxSize()
-          .layerBackdrop(backgroundBackdrop)
-          .then(if (glassSamplingBackground) pageBackground else Modifier),
-      ) {
-        DefaultPageBackgroundLayer()
-      }
-    }
+  // 外层只负责布局：内容区 + 底部导航栏（M3 NavigationBar 占布局高度）
+  Box(modifier.fillMaxSize()) {
     val contentLayerModifier = Modifier
-      // source 节点常驻，避免切页结束时重新挂载玻璃录制层；Web 首页参与绘制时改由
-      // backgroundBackdrop 采样（见上），不把内容（含 WebView）录进任何采样层。
-      .then(if (bottomBackdropActive && !webHomeInvolved) Modifier.layerBackdrop(backdrop) else Modifier)
-      .then(
-        // 仅玻璃外观风格需要（该模式下 PageGrey 透明、根部背景在采样层之外）；
-        // Web 首页场景背景已移到仅背景层，此处不再重复画，避免半透明光晕叠加增强。
-        if (glassSamplingBackground && !webHomeInvolved) {
-          pageBackground
-        } else {
-          Modifier
-        },
-      )
-      // 玻璃系：PageGrey（透明）兜底；默认风格由根部背景层绘制（此处不再铺不透明纯色）
-      .then(
-        if (AppThemeColors.isGlass) {
-          Modifier.background(MaterialTheme.colorScheme.background)
-        } else {
-          Modifier
-        },
-      )
     if (railLayout) {
       // 平板/大窗口：主导航移到侧边，按外观风格取该主题「默认导航栏」形态
       Row(Modifier.fillMaxSize()) {
@@ -471,93 +366,14 @@ fun MainScreen(
           foldDesaturate = homeStyle != AppSettingsStore.HOME_STYLE_WEB,
           onboarding = coachPage != null,
         )
-        if (!liquidGlass && !floatingDefaultNav && !floatingButtonActive) {
-          DefaultBottomNavigationBar(
-            selectedIndex = selectedNavIndex,
-            items = liquidGlassTabItems,
-            unselectedColor = unselectedColor,
-            onSelectPage = onSelectNavPage,
-          )
-        }
-      }
-    }
-
-    // 液态玻璃 · 经典：悬浮在内容之上。
-    // 透镜档（应用设置 → 导航栏样式 → 液态玻璃 · 透镜）改用三层采样 + 折射透镜；默认与经典档走原实现。
-    if (liquidBottomActive) {
-      // 透镜档必须要有可用采样层（backdropAvailable 已含 API 门槛与液态玻璃条件）；
-      // 万一不满足则退回经典档，而不是拿未挂载的 backdrop 渲染（组件契约要求）
-      if (enhancedBarActive) {
-        EnhancedLiquidGlassNavigationBar(
-          backdrop = navBackdrop,
-          // 权威选中值先夹取到合法槽位，避免越界值把透镜放到栏外（组件内部也会再夹一次）
-          selectedIndex = selectedNavIndex,
-          colors = rememberGlassBottomBarColors(unselectedColor),
-          items = liquidGlassTabItems,
-          onItemClick = onSelectNavPage,
-          modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .navigationBarsPadding()
-            .padding(bottom = GlassBottomBarSpec.Default.hostBottomPadding),
-        )
-      } else {
-        LiquidGlassNavigationBar(
-          backdrop = navBackdrop,
-          selectedIndex = selectedNavIndex,
-          primaryColor = MaterialTheme.colorScheme.primary,
-          unselectedColor = unselectedColor,
-          items = liquidGlassTabItems,
-          onItemClick = onSelectNavPage,
-          modifier = Modifier.align(Alignment.BottomCenter),
-        )
-      }
-    }
-
-    // 玻璃外观风格下的默认导航栏：悬浮圆角玻璃条（玻璃底 + 0.5dp 描边 + 应用圆角），
-    // 内容可从其下方滚过，列表底部留白由 glassNavBottomInset() 统一提供。
-    if (floatingDefaultNav) {
-      Box(
-        modifier = Modifier
-          .align(Alignment.BottomCenter)
-          .fillMaxWidth()
-          .navigationBarsPadding()
-          .padding(horizontal = 12.dp, vertical = 12.dp),
-      ) {
         DefaultBottomNavigationBar(
           selectedIndex = selectedNavIndex,
           items = liquidGlassTabItems,
           unselectedColor = unselectedColor,
           onSelectPage = onSelectNavPage,
-          modifier = Modifier
-            .fillMaxWidth()
-            // 无文字后按图标高度收窄导航条（64dp）；圆角取「应用圆角调整」值
-            .height(64.dp)
-            .clip(AppComponentShape)
-            .glassBorder(AppComponentShape),
-          windowInsets = WindowInsets(0.dp),
-          // 复古玻璃的更实玻璃底 + 只显示图标
-          containerColor = GlassNavSurface,
-          showLabels = false,
         )
       }
     }
-
-    // 悬浮按钮导航：右下角一个圆形液态玻璃按钮，点击后各导航项沿 1/4 圆弧交错展开；
-    // 悬浮不占布局高度，内容底部留白由 glassNavBottomInset() 统一提供。
-    if (floatingButtonActive) {
-      FloatingGlassNavButton(
-        backdrop = if (floatingButtonBackdrop) navBackdrop else null,
-        items = liquidGlassTabItems,
-        selectedIndex = selectedNavIndex,
-        primaryColor = MaterialTheme.colorScheme.primary,
-        onItemClick = onSelectNavPage,
-        // 组件在安全区内自行摆放（长按可拖动、位置持久化），宿主只负责占满可用区域
-        modifier = Modifier.fillMaxSize(),
-        outsideTapBridge = floatingNavOutsideTapBridge,
-      )
-    }
-
-  }
   }
 
   globalLaunchError?.let { state ->
@@ -758,47 +574,42 @@ private fun DefaultBottomNavigationBar(
   unselectedColor: Color,
   onSelectPage: (Int) -> Unit,
   modifier: Modifier = Modifier,
-  windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
-  containerColor: Color = NavWhite,
   showLabels: Boolean = true,
 ) {
-  // 去掉点击 ripple（material3 1.4 起 ripple 读取 LocalRippleConfiguration，置 null 全局禁用）
-  CompositionLocalProvider(LocalRippleConfiguration provides null) {
-    NavigationBar(
-      modifier = modifier,
-      containerColor = containerColor,
-      contentColor = LocalContentColor.current,
-      windowInsets = windowInsets,
-    ) {
-      items.forEachIndexed { index, item ->
-        val label = item.label
-        val selected = selectedIndex == index
-        val itemColor = if (selected) MaterialTheme.colorScheme.primary else unselectedColor
-        NavigationBarItem(
-          selected = selected,
-          onClick = { onSelectPage(index) },
-          icon = {
-            // 选中态染色动画与平板侧栏共用同一实现（见 ui/common/NavigationTabIcon.kt）
-            NavigationTabIcon(
-              iconRes = item.iconRes,
-              contentDescription = label,
-              selected = selected,
-              unselectedColor = unselectedColor,
-              selectedColor = MaterialTheme.colorScheme.primary,
-              animationLabel = "navIconFill$index",
-            )
-          },
-          label = if (showLabels) { { Text(label) } } else null,
-          // 去掉选中高亮：仅图标颜色填充动画与文字颜色区分选中态
-          colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.primary,
-            selectedTextColor = MaterialTheme.colorScheme.primary,
-            indicatorColor = Color.Transparent,
-            unselectedIconColor = unselectedColor,
-            unselectedTextColor = unselectedColor,
-          ),
-        )
-      }
+  NavigationBar(
+    modifier = modifier,
+    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+    contentColor = MaterialTheme.colorScheme.onSurface,
+    windowInsets = NavigationBarDefaults.windowInsets,
+  ) {
+    items.forEachIndexed { index, item ->
+      val label = item.label
+      val selected = selectedIndex == index
+      NavigationBarItem(
+        selected = selected,
+        onClick = { onSelectPage(index) },
+        icon = {
+          // 选中态图标填充动画与平板侧栏共用同一实现（见 ui/common/NavigationTabIcon.kt）
+          NavigationTabIcon(
+            icon = item.icon ?: AppIcons.home,
+            unselectedIcon = item.unselectedIcon ?: AppIcons.homeOutlined,
+            contentDescription = label,
+            selected = selected,
+            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            selectedColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            animationLabel = "navIconFill$index",
+          )
+        },
+        label = if (showLabels) { { Text(label) } } else null,
+        // Material 3 标准指示器：选中项为 secondaryContainer 胶囊
+        colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+          selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+          selectedTextColor = MaterialTheme.colorScheme.onSurface,
+          indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+          unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+          unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+      )
     }
   }
 }

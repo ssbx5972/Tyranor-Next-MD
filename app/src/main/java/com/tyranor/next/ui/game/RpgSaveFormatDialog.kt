@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.game
 
+import com.tyranor.next.ui.common.AppIcons
+
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +74,7 @@ internal fun RpgSaveFormatDialog(
                 AppNavItem(
                     modifier = Modifier.staggeredEntrance(0),
                     title = stringResource(R.string.save_format_convert_confirm),
-                    leadingIcon = R.drawable.ic_sheet_saves,
+                    leadingIconVector = AppIcons.save,
                     containerColor = DialogItemSurface,
                     showArrow = false,
                     leadingIconTint = MaterialTheme.colorScheme.primary,
@@ -83,7 +85,7 @@ internal fun RpgSaveFormatDialog(
                 AppNavItem(
                     modifier = Modifier.staggeredEntrance(1),
                     title = stringResource(R.string.save_format_convert_keep),
-                    leadingIcon = R.drawable.ic_sheet_launch,
+                    leadingIconVector = AppIcons.play,
                     containerColor = DialogItemSurface,
                     showArrow = false,
                     indication = null,

@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -70,27 +74,18 @@ internal fun NoRippleActionText(
     colorLabel: String,
     onClick: () -> Unit,
 ) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        // 可用 ↔ 不可用：「增强」档文字颜色弹簧淡变，「普通」档直接切换
-        color = if (MotionMode.enhanced) {
-            animateColorAsState(targetColor, MotionTokens.fadeIn(), label = colorLabel).value
-        } else {
-            targetColor
-        },
-        modifier = modifier
-            .pressSquish(enabled = enabled, refuse = true)
-            .clip(AppComponentShape)
-            .clickable(
-                enabled = enabled,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = 12.dp, vertical = verticalPadding),
-    )
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+        colors = ButtonDefaults.textButtonColors(contentColor = targetColor),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 /**
@@ -104,58 +99,49 @@ fun NoRippleButton(
     enabled: Boolean = true,
     tonal: Boolean = false,
     leadingIcon: Painter? = null,
+    leadingIconVector: ImageVector? = null,
     iconContentDescription: String? = null,
     fillColor: Color = MaterialTheme.colorScheme.primary,
     maxLines: Int = 1,
     onClick: () -> Unit,
 ) {
     val container = when {
-        tonal -> fillColor.copy(alpha = 0.14f)
-        enabled -> fillColor
-        else -> fillColor.copy(alpha = 0.38f)
+        tonal -> MaterialTheme.colorScheme.secondaryContainer
+        else -> fillColor
     }
-    val contentColor = if (tonal) fillColor else Color.White
-    val enhanced = MotionMode.enhanced
-    // 可用 ↔ 不可用、实底 ↔ 浅底：「增强」档底色弹簧淡变（在绘制阶段读取，不逐帧重组），「普通」档直接切换
-    val animatedContainer = if (enhanced) {
-        animateColorAsState(container, MotionTokens.fadeIn(), label = "noRippleButtonContainer")
-    } else {
-        null
+    val contentColor = when {
+        tonal -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> Color.White
     }
-    Row(
-        modifier = modifier
-            .pressSquish(enabled = enabled, refuse = true)
-            .clip(AppComponentShape)
-            .then(
-                if (animatedContainer != null) {
-                    Modifier.drawBehind { drawRect(animatedContainer.value) }
-                } else {
-                    Modifier.background(container)
-                },
-            )
-            .clickable(
-                enabled = enabled,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = container,
+            contentColor = contentColor,
+        ),
     ) {
-        leadingIcon?.let { painter ->
+        if (leadingIconVector != null) {
             Icon(
-                painter = painter,
+                imageVector = leadingIconVector,
                 contentDescription = iconContentDescription,
-                tint = contentColor,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(18.dp),
             )
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(8.dp))
+        } else {
+            leadingIcon?.let { painter ->
+                Icon(
+                    painter = painter,
+                    contentDescription = iconContentDescription,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+            }
         }
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = contentColor,
+            style = MaterialTheme.typography.labelLarge,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
         )

@@ -43,7 +43,6 @@ import com.tyranor.next.theme.AppThemeColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
 /**
  * 独立 Activity 页面之间的转场：水平侧推（新页从右侧推入、上一级向左让开 30% 并压暗；返回原路倒放）。
@@ -561,15 +560,12 @@ fun ProvideMotionEnvironment(content: @Composable () -> Unit) {
         MotionHaptics.bind(haptic)
         onDispose { MotionHaptics.unbind(haptic) }
     }
-    // 「普通」档保持系统默认的越界效果；始终保留同一个 Provider，切换档位不重建页面
-    val overscroll = if (enhanced) MiuixOverscrollFactory else LocalOverscrollFactory.current
-    CompositionLocalProvider(LocalOverscrollFactory provides overscroll) {
-        // 主题揭开宿主：切换深浅色 / 外观主题时的整屏过渡（见 ThemeReveal.kt）；不改布局
-        // 提示条槽位（页面根）：与主题揭开宿主叠放，提示条只在自己的矩形内拦截触摸
-        Box(propagateMinConstraints = true) {
-            ThemeRevealHost(content)
-            NoticeHost(Modifier.matchParentSize())
-        }
+    // Material 3：使用平台默认越界效果
+    // 主题揭开宿主：切换深浅色 / 外观主题时的整屏过渡（见 ThemeReveal.kt）；不改布局
+    // 提示条槽位（页面根）：与主题揭开宿主叠放，提示条只在自己的矩形内拦截触摸
+    Box(propagateMinConstraints = true) {
+        ThemeRevealHost(content)
+        NoticeHost(Modifier.matchParentSize())
     }
 }
 

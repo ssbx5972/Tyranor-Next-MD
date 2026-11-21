@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,6 +85,8 @@ fun AppNavItem(
     /** 行尾内联文本（与标题同行、右对齐单行）；与 [summary] 独立并存，两者可同时渲染。 */
     trailingText: String? = null,
     @DrawableRes leadingIcon: Int? = null,
+    /** Material Icons 版本的左侧图标；传入后优先于 [leadingIcon] 的 drawable。 */
+    leadingIconVector: ImageVector? = null,
     showLeadingIcon: Boolean = true,
     containerColor: Color = NavWhite,
     verticalPadding: Dp = 12.dp,
@@ -110,13 +114,7 @@ fun AppNavItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // Q 弹按压：有底卡时整卡形变，卡内平面条目缩得更少
-            .pressSquish(
-                enabled = enabled,
-                scale = if (drawSurface) PressSquishDefaults.CardScale else PressSquishDefaults.RowScale,
-                refuse = true,
-            )
-            .clip(AppComponentShape)
+            .clip(MaterialTheme.shapes.large)
             .clickable(
                 interactionSource = interactionSource,
                 indication = indication,
@@ -130,17 +128,23 @@ fun AppNavItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showLeadingIcon) {
-            Image(
-                painter = painterResource(leadingIcon ?: DEFAULT_LEADING_ICON),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                // 显式 tint 优先；否则深色模式下染白，保持低亮度背景上的可读性
-                colorFilter = when {
-                    leadingIconTint != null -> ColorFilter.tint(leadingIconTint.copy(alpha = contentAlpha))
-                    AppThemeColors.isDark -> ColorFilter.tint(Color.White.copy(alpha = contentAlpha))
-                    else -> null
-                },
-            )
+            val tint = (leadingIconTint ?: MaterialTheme.colorScheme.onSurfaceVariant)
+                .copy(alpha = contentAlpha)
+            if (leadingIconVector != null || leadingIcon == null) {
+                Icon(
+                    imageVector = leadingIconVector ?: AppIcons.memory,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.size(24.dp),
+                )
+            } else {
+                Image(
+                    painter = painterResource(leadingIcon),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = ColorFilter.tint(tint),
+                )
+            }
         }
         Column(
             modifier = Modifier.weight(1f).padding(start = if (showLeadingIcon) 12.dp else 0.dp),
@@ -148,7 +152,7 @@ fun AppNavItem(
         ) {
             Text(
                 title,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = (titleColor ?: TextColor).copy(alpha = contentAlpha),
                 maxLines = titleMaxLines,
                 overflow = TextOverflow.Ellipsis,
@@ -158,8 +162,8 @@ fun AppNavItem(
                 BlurCrossfade(targetState = shownSummary.orEmpty(), label = "navItemSummaryText") { text ->
                     Text(
                         text,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextColor.copy(alpha = 0.55f * contentAlpha),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha),
                         maxLines = summaryMaxLines,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -213,5 +217,3 @@ fun AppNavItem(
     }
 }
 
-/** 功能条目的默认占位图标：调用方未提供 [AppNavItem.leadingIcon] 时使用。 */
-private val DEFAULT_LEADING_ICON: Int = R.drawable.ic_engine_item

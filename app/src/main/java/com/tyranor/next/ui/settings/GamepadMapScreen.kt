@@ -57,10 +57,10 @@ import com.tyranor.next.ui.common.motion.staggeredEntrance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 /** 手柄映射编辑页：逐逻辑按键与摇杆方向编辑输出键位。 */

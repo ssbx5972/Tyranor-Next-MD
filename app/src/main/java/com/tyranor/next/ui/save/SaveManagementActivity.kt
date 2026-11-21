@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.save
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -79,9 +81,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 class SaveManagementActivity : AppScreenActivity() {
@@ -565,7 +567,7 @@ private fun SaveManagementScreen(game: ScanGame) {
                         title = stringResource(R.string.save_export_format_standard),
                         modifier = Modifier.staggeredEntrance(2, distance = 10.dp, stepMillis = 45L),
                         summary = stringResource(R.string.save_export_format_standard_summary),
-                        leadingIcon = R.drawable.ic_save_export_format,
+                        leadingIconVector = AppIcons.fileDownload,
                         containerColor = DialogItemSurface,
                         showArrow = false,
                         indication = null,
@@ -579,7 +581,7 @@ private fun SaveManagementScreen(game: ScanGame) {
                         title = stringResource(R.string.save_export_format_tyranor),
                         modifier = Modifier.staggeredEntrance(3, distance = 10.dp, stepMillis = 45L),
                         summary = stringResource(R.string.save_export_format_tyranor_summary),
-                        leadingIcon = R.drawable.ic_save_export_format,
+                        leadingIconVector = AppIcons.fileDownload,
                         containerColor = DialogItemSurface,
                         showArrow = false,
                         indication = null,

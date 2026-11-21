@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,8 +42,8 @@ import com.tyranor.next.ui.common.motion.BlurCrossfade
 import com.tyranor.next.ui.common.motion.ExpandVisibility
 import com.tyranor.next.ui.common.notice.AppNotice
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Scaffold as Scaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 
 @Composable
 internal fun SystemNnnSettingsScreen() {
@@ -61,7 +63,7 @@ internal fun SystemNnnSettingsScreen() {
                     contentColor = PageTextColor,
                     trailing = {
                         TopBarIcon(
-                            painterResource(R.drawable.ic_save),
+                            AppIcons.save,
                             stringResource(R.string.engine_settings_save_content_description),
                             MiuixTheme.colorScheme.primary,
                         ) {

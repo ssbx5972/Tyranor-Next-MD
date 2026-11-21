@@ -25,12 +25,9 @@ import androidx.compose.ui.unit.dp
 import com.tyranor.next.R
 
 /**
- * 应用根背景统一组件：
- * - 复古玻璃：黑灰三档竖向渐变 + 白色顶部光晕 + 主题色对角环境光；
- * - 白雾玻璃：64dp 模糊图片底图 + 16% 白纱 + 38% 压暗 + 主题色环境光 + 轻暗角；
- * - 默认风格：纯色底 + 主题色粒子（由 [DefaultPageBackgroundLayer] 绘制）。
- * 所有顶层组合（MainActivity / AppScreenScaffold）必须经本组件包裹，否则透明页面背景会露出
- * 窗口底色。内部保留 Surface 以维持 contentColor 语义。
+ * 应用根背景：Material 3 的纯色 background 表面（可选用户自定义背景图）。
+ * 所有顶层组合（MainActivity / AppScreenScaffold）都必须经本组件包裹，
+ * 否则透明页面背景会露出窗口底色。内部保留 Surface 以维持 contentColor 语义。
  */
 @Composable
 fun GlassBackground(
@@ -43,19 +40,7 @@ fun GlassBackground(
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
         Box(Modifier.fillMaxSize()) {
-            // 外观风格自带背景（纯色+粒子 / 玻璃渐变 / 白雾底图）
-            when {
-                // 白雾玻璃：模糊图片底图 + 白纱提亮 + 主题色环境光
-                AppThemeColors.isMilkGlass -> MilkGlassPageBackgroundLayer()
-                // 复古玻璃：黑灰渐变 + 环境光；默认风格：纯色底 + 主题色粒子
-                AppThemeColors.isGlass -> Box(Modifier.fillMaxSize().glassPageBackground(AppThemeColors.primary))
-                else -> DefaultPageBackgroundLayer()
-            }
-            // 自定义背景图：默认风格由 DefaultPageBackgroundLayer 内部绘制（保证在粒子下方）；
-            // 玻璃系风格自带底图，背景图叠在它之上、页面内容之下
-            if (AppThemeColors.isGlass || AppThemeColors.isMilkGlass) {
-                CustomBackgroundImageLayer()
-            }
+            DefaultPageBackgroundLayer()
             Box(Modifier.fillMaxSize()) {
                 content()
             }
@@ -219,24 +204,11 @@ val GlassEdgeStrokeWidth: Dp = 0.5.dp
 const val GlassEdgeStrokeAlpha: Float = 0.10f
 
 /**
- * 玻璃风格 0.5dp 发丝描边；默认风格原样返回。
- * 颜色/显隐由 [AppThemeColors] 快照驱动，风格切换自动重组刷新。
- * 用 drawWithContent 在内容之后绘制，保证描边盖在卡片/条目背景之上。
+ * 历史玻璃描边：Material 3 用色调高度（surfaceContainer 层级）表达边界，不再绘制发丝线。
+ * 保留空实现以兼容既有调用点。
  */
 fun Modifier.glassBorder(
     shape: Shape = AppComponentShape,
     width: Dp = 0.5.dp,
     color: Color = GlassBorder,
-): Modifier =
-    if (!AppThemeColors.isGlass) {
-        this
-    } else {
-        this.drawWithContent {
-            drawContent()
-            drawOutline(
-                outline = shape.createOutline(size, layoutDirection, this),
-                color = color,
-                style = Stroke(width = width.toPx()),
-            )
-        }
-    }
+): Modifier = this

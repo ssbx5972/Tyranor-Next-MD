@@ -42,6 +42,7 @@ import com.tyranor.next.core.settings.AppSettingsStore
 import com.tyranor.next.theme.AppComponentCornerRadius
 import com.tyranor.next.theme.MiuixSettingsTheme
 import com.tyranor.next.ui.common.AppAlertDialog
+import com.tyranor.next.ui.common.AppIcons
 import com.tyranor.next.ui.common.SettingsEntryCard
 import com.tyranor.next.ui.common.AppScreenActivity
 import com.tyranor.next.ui.common.AppSecondaryTopBar
@@ -131,7 +132,7 @@ internal fun AboutAppScreen() {
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(1),
                         title = stringResource(R.string.about_project_url),
-                        iconRes = R.drawable.ic_update_github,
+                        icon = AppIcons.code,
                         onClick = {
                             // 交给系统浏览器打开项目仓库；无可用浏览器时静默失败
                             runCatching {
@@ -143,13 +144,13 @@ internal fun AboutAppScreen() {
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(2),
                         title = stringResource(R.string.about_acknowledgements),
-                        iconRes = R.drawable.ic_about_acknowledgements,
+                        icon = AppIcons.description,
                         onClick = {},
                     )
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(3),
                         title = stringResource(R.string.about_disclaimer),
-                        iconRes = R.drawable.ic_about_disclaimer,
+                        icon = AppIcons.warning,
                         onClick = { showDisclaimer = true },
                     )
                 }

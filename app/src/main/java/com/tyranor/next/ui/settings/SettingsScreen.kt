@@ -96,6 +96,7 @@ import com.tyranor.next.ui.common.AppBottomSheet
 import com.tyranor.next.ui.common.AppSearchField
 import com.tyranor.next.ui.common.AppSecondaryTopBar
 import com.tyranor.next.ui.common.AppTopBar
+import com.tyranor.next.ui.common.AppIcons
 import com.tyranor.next.ui.common.SettingsEntryCard
 import com.tyranor.next.ui.common.coachAnchor
 import com.tyranor.next.ui.common.BottomInsetSpacer
@@ -140,15 +141,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
+import com.tyranor.next.ui.common.M3Card as MiuixCard
 import com.tyranor.next.ui.common.MotionLinearProgressIndicator
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.Slider
-import top.yukonga.miuix.kmp.basic.SliderDefaults
+import com.tyranor.next.ui.common.SliderDefaults
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.OverlayDropdownPreference
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 /** 更新弹窗的下载阶段；null 表示停留在“发现新版本”阶段，四个阶段复用同一个 AppAlertDialog。 */
@@ -366,34 +367,6 @@ fun SettingsScreen(
                                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                                 modifier = Modifier.staggeredEntrance(3, distance = 10.dp).padding(horizontal = 16.dp),
                             )
-                            val appearanceStyles = AppearanceStyle.entries
-                            val appearanceLabels = appearanceStyles.map { style ->
-                                stringResource(
-                                    when (style) {
-                                        AppearanceStyle.DEFAULT -> R.string.settings_appearance_style_default
-                                        AppearanceStyle.RETRO_GLASS -> R.string.settings_appearance_style_glass
-                                        AppearanceStyle.MILK_GLASS -> R.string.settings_appearance_style_milk
-                                    },
-                                )
-                            }
-                            val themeSwitch = rememberThemeSwitch()
-                            OverlayDropdownPreference(
-                                modifier = Modifier
-                                    .staggeredEntrance(4, distance = 10.dp)
-                                    .bounceOnChange(AppThemeColors.appearanceStyle, depth = 0.05f)
-                                    .pressSquish(scale = PressSquishDefaults.RowScale),
-                                title = stringResource(R.string.settings_appearance_style),
-                                items = appearanceLabels,
-                                selectedIndex = appearanceStyles.indexOf(AppThemeColors.appearanceStyle).coerceAtLeast(0),
-                                onSelectedIndexChange = { index ->
-                                    appearanceStyles.getOrNull(index)?.let { style ->
-                                        themeSwitch {
-                                            AppSettingsStore.setAppearanceStyle(ctx, style)
-                                            AppThemeColors.refresh(ctx)
-                                        }
-                                    }
-                                },
-                            )
                         }
                     }
                 }
@@ -401,7 +374,7 @@ fun SettingsScreen(
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(1),
                         title = stringResource(R.string.settings_app_title),
-                        iconRes = R.drawable.ic_settings_app,
+                        icon = AppIcons.settings,
                         onClick = { startActivityWithPageTransition(ctx, AppSettingsActivity.createIntent(ctx)) },
                     )
                 }
@@ -409,7 +382,7 @@ fun SettingsScreen(
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(2),
                         title = stringResource(R.string.settings_cover_scraper),
-                        iconRes = R.drawable.ic_game_cover,
+                        icon = AppIcons.collections,
                         onClick = { startActivityWithPageTransition(ctx, CoverScraperSettingsActivity.createIntent(ctx)) },
                     )
                 }
@@ -421,7 +394,7 @@ fun SettingsScreen(
                         } else {
                             stringResource(R.string.settings_update_check)
                         },
-                        iconRes = R.drawable.ic_settings_update,
+                        icon = AppIcons.update,
                         showBadge = hasUpdate,
                         busy = checkingUpdate,
                         onClick = { checkUpdate() },
@@ -431,7 +404,7 @@ fun SettingsScreen(
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(4),
                         title = stringResource(R.string.settings_join_group),
-                        iconRes = R.drawable.ic_settings_group,
+                        icon = AppIcons.groups,
                         onClick = { showGroupDialog = true },
                     )
                 }
@@ -439,7 +412,7 @@ fun SettingsScreen(
                     SettingsEntryCard(
                         modifier = Modifier.staggeredEntrance(5),
                         title = stringResource(R.string.settings_about_app),
-                        iconRes = R.drawable.ic_settings_about,
+                        icon = AppIcons.info,
                         onClick = { startActivityWithPageTransition(ctx, AboutAppActivity.createIntent(ctx)) },
                     )
                 }
@@ -500,10 +473,10 @@ fun SettingsScreen(
                                 .padding(start = 16.dp, end = 8.dp, top = 11.dp, bottom = 11.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Image(
-                                painter = painterResource(R.drawable.ic_settings_game_dir),
+                            Icon(
+                                imageVector = AppIcons.folderOpen,
                                 contentDescription = null,
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
@@ -529,7 +502,7 @@ fun SettingsScreen(
                             ) {
                                 // 复用长按游戏卡片操作弹窗「删除游戏」的左侧图标
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_sheet_delete),
+                                    imageVector = AppIcons.delete,
                                     contentDescription = stringResource(R.string.common_delete),
                                     tint = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(24.dp),
@@ -642,7 +615,7 @@ fun SettingsScreen(
                         // 路径无效：输入框横向抖动衰减（只改绘制图层）
                         modifier = Modifier.shakeOnTrigger(pathRejects),
                         onSearch = savePath,
-                        leadingIcon = painterResource(R.drawable.ic_sheet_folder),
+                        leadingIconVector = AppIcons.folder,
                         iconContentDescription = stringResource(R.string.settings_input_dir_title),
                         imeAction = ImeAction.Done,
                         textStyle = MaterialTheme.typography.bodyMedium,
@@ -681,7 +654,7 @@ fun SettingsScreen(
                     AppNavItem(
                         stringResource(R.string.settings_qq_group),
                         modifier = Modifier.staggeredEntrance(1, distance = 10.dp, stepMillis = 40L),
-                        leadingIcon = R.drawable.ic_group_qq,
+                        leadingIconVector = AppIcons.chat,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -691,7 +664,7 @@ fun SettingsScreen(
                     AppNavItem(
                         stringResource(R.string.settings_telegram_channel),
                         modifier = Modifier.staggeredEntrance(2, distance = 10.dp, stepMillis = 40L),
-                        leadingIcon = R.drawable.ic_group_telegram,
+                        leadingIconVector = AppIcons.send,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -739,7 +712,7 @@ fun SettingsScreen(
                                     // 版本条目跟在正文之后依次升起
                                     modifier = Modifier.staggeredEntrance(candidateIndex + 1, distance = 10.dp, stepMillis = 35L),
                                     title = stringResource(R.string.update_version_item, candidate.latestVersion),
-                                    leadingIcon = R.drawable.ic_update_download,
+                                    leadingIconVector = AppIcons.download,
                                     containerColor = DialogItemSurface,
                                     indication = null,
                                     onClick = {
@@ -761,7 +734,7 @@ fun SettingsScreen(
                             AppNavItem(
                                 modifier = Modifier.staggeredEntrance(update.candidates.size + 1, distance = 10.dp, stepMillis = 35L),
                                 title = stringResource(R.string.update_open_releases),
-                                leadingIcon = R.drawable.ic_update_github,
+                                leadingIconVector = AppIcons.code,
                                 containerColor = DialogItemSurface,
                                 indication = null,
                                 showArrow = false,
@@ -1138,7 +1111,7 @@ internal fun EngineSettingsDetailScreen(kind: EngineSettingsKind) {
                     background = Color.Transparent,
                     contentColor = PageTextColor,
                     trailing = {
-                        TopBarIcon(painterResource(R.drawable.ic_save), stringResource(R.string.engine_settings_save_content_description), MiuixTheme.colorScheme.primary) {
+                        TopBarIcon(AppIcons.save, stringResource(R.string.engine_settings_save_content_description), MiuixTheme.colorScheme.primary) {
                             saveCurrentEngine()
                             AppNotice.makeText(ctx, engineSettingsSavedMessage, android.widget.Toast.LENGTH_SHORT, AppNotice.Kind.Success).show()
                         }
@@ -1855,7 +1828,7 @@ private fun WinlatorValueDialog(
                             .staggeredEntrance(1, distance = 10.dp, stepMillis = 40L)
                             .shakeOnTrigger(rejects),
                         onSearch = { if (canConfirm) onConfirm(normalized) else rejects++ },
-                        leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                        leadingIconVector = AppIcons.rename,
                         iconContentDescription = title,
                         imeAction = ImeAction.Done,
                         keyboardType = keyboardType,

@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.cover
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.LocalIndication
@@ -190,7 +192,7 @@ internal fun CredentialTokenDialog(
                             },
                             onSearch = { confirm() },
                             imeAction = ImeAction.Done,
-                            leadingIcon = painterResource(R.drawable.ic_cover_source),
+                            leadingIconVector = AppIcons.collections,
                             iconContentDescription = title,
                             textStyle = MaterialTheme.typography.bodyMedium,
                             // 凭据字段：掩码 + 密码键盘 + Password autofill 身份（两弹窗同约定）
@@ -216,7 +218,7 @@ internal fun CredentialTokenDialog(
                         ) {
                             BlurCrossfade(targetState = tokenVisible, label = "tokenVisibilityIcon") { visible ->
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_visibility),
+                                    imageVector = AppIcons.visibility,
                                     contentDescription = stringResource(
                                         if (visible) R.string.auth_token_hide else R.string.auth_token_show,
                                     ),

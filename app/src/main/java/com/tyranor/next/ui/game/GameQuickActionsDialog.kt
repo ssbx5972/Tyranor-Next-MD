@@ -1,11 +1,14 @@
 package com.tyranor.next.ui.game
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -284,7 +287,7 @@ internal fun GameQuickActionsDialog(
                         } else {
                             stringResource(R.string.game_add_quick_launch)
                         },
-                        leadingIcon = R.drawable.ic_home,
+                        leadingIcon = AppIcons.home,
                         onClick = {
                             feedback.toggle(onQuickLaunchToggle, close = { exitHandle.closeThen(onDismiss) }) {
                                 AppNotice.makeText(context, quickLaunchFullMessage, Toast.LENGTH_SHORT, AppNotice.Kind.Limit)
@@ -295,13 +298,13 @@ internal fun GameQuickActionsDialog(
                     QuickActionItem(
                         modifier = feedback.shortcutRow(shortcutRequestInFlight),
                         title = stringResource(R.string.game_add_desktop_shortcut),
-                        leadingIcon = R.drawable.ic_sheet_desktop_shortcut,
+                        leadingIcon = AppIcons.desktopShortcut,
                         onClick = { if (!shortcutRequestInFlight) openShortcutCrop() else feedback.rejectShortcut() },
                     )
                     QuickActionItem(
                         modifier = Modifier.staggeredEntrance(2),
                         title = stringResource(R.string.game_rename),
-                        leadingIcon = R.drawable.ic_sheet_rename,
+                        leadingIcon = AppIcons.rename,
                         onClick = { showRenameDialog = true },
                     )
                     QuickActionDeleteButton(modifier = Modifier.staggeredEntrance(3), onClick = { showDeleteConfirm = true })
@@ -403,14 +406,14 @@ internal fun GameQuickActionsDialog(
 @Composable
 private fun QuickActionItem(
     title: String,
-    @DrawableRes leadingIcon: Int,
+    leadingIcon: ImageVector,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     AppNavItem(
         modifier = modifier,
         title = title,
-        leadingIcon = leadingIcon,
+        leadingIconVector = leadingIcon,
         containerColor = DialogItemSurface,
         leadingIconTint = MaterialTheme.colorScheme.primary,
         indication = null,
@@ -440,10 +443,10 @@ private fun QuickActionDeleteButton(modifier: Modifier, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(R.drawable.ic_sheet_delete),
+        Icon(
+            imageVector = AppIcons.delete,
             contentDescription = null,
-            colorFilter = ColorFilter.tint(OnDangerFill),
+            tint = OnDangerFill,
             modifier = Modifier.size(20.dp),
         )
         Text(
@@ -506,10 +509,10 @@ private fun QuickActionCover(
                 .background(CoverBadgeBackground),
             contentAlignment = Alignment.Center,
         ) {
-            Image(
-                painter = painterResource(R.drawable.ic_sheet_edit_cover),
+            Icon(
+                imageVector = AppIcons.imageSearch,
                 contentDescription = editCoverLabel,
-                colorFilter = ColorFilter.tint(CoverBadgeText),
+                tint = CoverBadgeText,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -553,7 +556,7 @@ private fun RenameGameDialog(
                     },
                     modifier = Modifier.shakeOnTrigger(invalidShake),
                     imeAction = ImeAction.Done,
-                    leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                    leadingIconVector = AppIcons.rename,
                     iconContentDescription = stringResource(R.string.game_rename),
                     textStyle = MaterialTheme.typography.bodyMedium,
                 )

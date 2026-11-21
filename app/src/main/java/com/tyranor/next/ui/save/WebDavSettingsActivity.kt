@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.save
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -86,12 +89,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.OverlayDropdownPreference
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.collectSettingAsState
 import com.tyranor.next.ui.common.notice.AppNotice
 
@@ -113,20 +116,20 @@ private class WebDavOperationResult(val message: String, val kind: AppNotice.Kin
 
 private enum class WebDavTextField(
     val title: Int,
-    val icon: Int,
+    val icon: ImageVector,
     val keyboardType: KeyboardType,
     val autofillContentType: ContentType? = null,
 ) {
-    URL(R.string.webdav_server_url, R.drawable.ic_web_link, KeyboardType.Uri),
+    URL(R.string.webdav_server_url, AppIcons.link, KeyboardType.Uri),
     USERNAME(
         R.string.webdav_username,
-        R.drawable.ic_sheet_rename,
+        AppIcons.rename,
         KeyboardType.Text,
         ContentType.Username,
     ),
     PASSWORD(
         R.string.webdav_password,
-        R.drawable.ic_save_key,
+        AppIcons.key,
         KeyboardType.Password,
         ContentType.Password,
     ),
@@ -450,7 +453,7 @@ private fun WebDavSettingsScreen() {
                                             session.modulePackageName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.save_external_exit_identity_unrecorded),
                                             session.directoryIdentity?.takeIf { it.isNotBlank() } ?: stringResource(R.string.save_external_exit_identity_unrecorded),
                                         ),
-                                        leadingIcon = R.drawable.ic_sheet_saves,
+                                        leadingIconVector = AppIcons.save,
                                         leadingIconTint = MiuixTheme.colorScheme.primary,
                                         showArrow = false,
                                         onClick = if (busy) null else ({
@@ -722,7 +725,7 @@ private fun WebDavSettingsScreen() {
                                 configError = null
                             },
                             onSearch = { commitEdit(field) },
-                            leadingIcon = painterResource(field.icon),
+                            leadingIconVector = field.icon,
                             iconContentDescription = stringResource(field.title),
                             textStyle = MaterialTheme.typography.bodyMedium,
                             imeAction = ImeAction.Done,

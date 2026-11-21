@@ -90,12 +90,7 @@ fun Modifier.pressSquish(
     follow: Dp = PressSquishDefaults.Follow,
     charge: Boolean = false,
     refuse: Boolean = false,
-): Modifier = when {
-    !MotionMode.enhanced -> this
-    enabled -> this then PressSquishElement(scale, follow, group = false, charge = charge)
-    refuse -> this then PressSquishElement(scale, 0.dp, group = false, charge = false, refuse = true)
-    else -> this
-}
+): Modifier = this // Material 3：按压反馈由标准 ripple 状态层承担，不再做形变
 
 /**
  * 组件内置的行级按压反馈：调用处传进来的修饰符里已经有行级 [pressSquish]（手写的）就不再重复加，避免同一行叠两层形变；
@@ -105,7 +100,7 @@ fun Modifier.pressSquish(
 fun Modifier.withRowPressSquish(
     enabled: Boolean = true,
     scale: Float = PressSquishDefaults.RowScale,
-): Modifier = if (this.any { it is PressSquishElement && !it.group }) this else this.pressSquish(enabled = enabled, scale = scale)
+): Modifier = this
 
 /**
  * 整张卡片 / 整个分组一起按压：手指按在卡片里任何一行上，整张卡片（底色、描边、所有行）以按下点为中心收拢、
@@ -116,7 +111,7 @@ fun Modifier.pressSquishGroup(
     scale: Float = PressSquishDefaults.GroupScale,
     follow: Dp = PressSquishDefaults.Follow,
     charge: Boolean = false,
-): Modifier = if (enabled && MotionMode.enhanced) this then PressSquishElement(scale, follow, group = true, charge = charge) else this
+): Modifier = this
 
 /**
  * 按下后先朝「浅一档」落下（深度的 [PRESS_SOFT_FRACTION]），过了这么久还没有被滚动 / 拖动接手，才压到完整深度：

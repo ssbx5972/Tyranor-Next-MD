@@ -59,8 +59,7 @@ import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.motion.staggeredEntrance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.RadioButton
-import top.yukonga.miuix.kmp.theme.MiuixTheme as MiuixPreferenceTheme
+import androidx.compose.material3.RadioButton
 import com.tyranor.next.ui.common.motion.DelayedProgress
 
 /**
@@ -174,7 +173,6 @@ internal fun PcGameAddDialog(
                         )
                         // 列表到达：候选 exe 自上而下依次弹入（列表出现时的一小段窗口内；之后滚入的直接显示）
                         ProvideEntrance {
-                        MiuixPreferenceTheme {
                             LazyColumn(
                                 modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).skipEntranceOnDrag(),
                                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -208,13 +206,12 @@ internal fun PcGameAddDialog(
                                         Box(Modifier.bounceOnChange(selected == candidate.name, depth = 0.2f)) {
                                             RadioButton(
                                                 selected = selected == candidate.name,
-                                                onClick = null,
+                                                onClick = {},
                                             )
                                         }
                                     }
                                 }
                             }
-                        }
                         }
                     }
                 }

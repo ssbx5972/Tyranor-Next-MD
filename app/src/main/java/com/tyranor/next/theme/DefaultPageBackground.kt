@@ -67,47 +67,9 @@ private data class FloatingParticle(
  */
 @Composable
 fun DefaultPageBackgroundLayer(modifier: Modifier = Modifier) {
-    if (AppThemeColors.isGlass || AppThemeColors.isMilkGlass) return
-    val background = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-    val particlesEnabled by AppSettingsStore.defaultThemeParticlesEnabled.collectAsState()
-    if (!particlesEnabled) {
-        // 关闭粒子时仍要保留自定义背景图（图片在纯色底之上、页面内容之下）
-        Box(background) { CustomBackgroundImageLayer() }
-        return
-    }
-    val style by AppSettingsStore.defaultThemeParticleStyle.collectAsState()
-    val primary = AppThemeColors.primary
-    val buttonWaterfall = style == DefaultThemeParticleStyle.BUTTON_WATERFALL
-    val particles = remember(primary, buttonWaterfall) { buildFloatingParticles(primary, buttonWaterfall) }
-    var elapsedSeconds by remember(style) { mutableFloatStateOf(0f) }
-
-    LaunchedEffect(style) {
-        if (!ValueAnimator.areAnimatorsEnabled()) return@LaunchedEffect
-        val frameInterval = if (buttonWaterfall) 0L else BubbleFrameIntervalNanos
-        var startNanos = 0L
-        var lastUpdateNanos = 0L
-        while (true) {
-            withFrameNanos { now ->
-                if (startNanos == 0L) startNanos = now
-                if (lastUpdateNanos == 0L || now - lastUpdateNanos >= frameInterval) {
-                    lastUpdateNanos = now
-                    elapsedSeconds = (now - startNanos) / 1_000_000_000f
-                }
-            }
-        }
-    }
-
-    // 瀑布每帧只更新自己的空图层，页面内容与纯色背景可以复用已录制的绘制指令。
-    // 自定义背景图必须单独放在粒子层下方；不能用带纯色背景的 background 修饰符画粒子层，
-    // 否则会在图片之上再铺一层不透明色。
-    val particleLayer = if (buttonWaterfall) {
-        Modifier.fillMaxSize().graphicsLayer()
-    } else {
-        Modifier.fillMaxSize()
-    }
-    Box(background) {
+    // Material 3：扁平纯色背景；用户自定义背景图（如有）叠在背景色之上、页面内容之下。
+    Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         CustomBackgroundImageLayer()
-        Box(particleLayer.drawBehind { drawFloatingParticles(particles, elapsedSeconds, buttonWaterfall) })
     }
 }
 

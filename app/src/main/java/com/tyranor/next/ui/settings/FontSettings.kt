@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import com.tyranor.next.ui.common.motion.BlurCrossfade
 import com.tyranor.next.ui.common.motion.ProvideEntrance
 import com.tyranor.next.ui.common.motion.breathing
@@ -125,7 +127,7 @@ internal fun FontPreference(
                     AppNavItem(
                         modifier = Modifier.staggeredEntrance(0),
                         title = followLabel,
-                        leadingIcon = R.drawable.ic_font_bookmark,
+                        leadingIconVector = AppIcons.bookmark,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -135,7 +137,7 @@ internal fun FontPreference(
                     AppNavItem(
                         modifier = Modifier.staggeredEntrance(1),
                         title = stringResource(R.string.engine_settings_select_font_file),
-                        leadingIcon = R.drawable.ic_font_bookmark,
+                        leadingIconVector = AppIcons.bookmark,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {

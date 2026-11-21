@@ -20,6 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.tyranor.next.ui.common.AppIcons
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -147,20 +149,20 @@ internal fun GraphicsChainEditor(chain: List<GraphicsNode>, enabled: Boolean, on
                     ) {
                         if (GraphicsFilterCatalog.scaleAdjustable(node.id)) {
                             GraphicsNodeAction(
-                                R.drawable.ic_graphics_scale,
+                                AppIcons.graphicsScale,
                                 R.string.graphics_filter_scale_settings,
                                 enabled && dragging == null
                             ) { editingScale = entry.key }
                         }
                         if (GraphicsFilterCatalog.parametersAdjustable(node.id)) {
                             GraphicsNodeAction(
-                                R.drawable.ic_graphics_parameters,
+                                AppIcons.tune,
                                 R.string.graphics_filter_parameters,
                                 enabled && dragging == null
                             ) { editingParameters = entry.key }
                         }
                         GraphicsNodeAction(
-                            R.drawable.ic_graphics_delete,
+                            AppIcons.delete,
                             R.string.graphics_chain_remove,
                             enabled && dragging == null
                         ) {
@@ -174,7 +176,7 @@ internal fun GraphicsChainEditor(chain: List<GraphicsNode>, enabled: Boolean, on
                                 .background(TextColor.copy(alpha = dividerAlpha))
                         )
                         GraphicsNodeAction(
-                            R.drawable.ic_graphics_up,
+                            AppIcons.graphicsUp,
                             R.string.graphics_chain_up,
                             enabled && index > 0 && dragging == null
                         ) {
@@ -182,7 +184,7 @@ internal fun GraphicsChainEditor(chain: List<GraphicsNode>, enabled: Boolean, on
                             if (position > 0) commit(entries.toMutableList().apply { add(position - 1, removeAt(position)) })
                         }
                         GraphicsNodeAction(
-                            R.drawable.ic_graphics_down,
+                            AppIcons.graphicsDown,
                             R.string.graphics_chain_down,
                             enabled && index < entries.lastIndex && dragging == null
                         ) {
@@ -222,7 +224,7 @@ internal fun GraphicsChainEditor(chain: List<GraphicsNode>, enabled: Boolean, on
 
 /** 节点工具按钮统一承载禁用态和无涟漪点击，按压形变与静止描边分别遵循动效和外观设置。 */
 @Composable
-private fun GraphicsNodeAction(icon: Int, label: Int, enabled: Boolean, onClick: () -> Unit) {
+private fun GraphicsNodeAction(icon: ImageVector, label: Int, enabled: Boolean, onClick: () -> Unit) {
     val description = stringResource(label)
     // 可用 ↔ 不可用（拖拽开始 / 结束、移到首尾、切换继承）：描边与图标透明度弹簧渐变，「普通」档直接切换
     val alpha = graphicsChainActionAlpha(enabled)
@@ -247,7 +249,7 @@ private fun GraphicsNodeAction(icon: Int, label: Int, enabled: Boolean, onClick:
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painterResource(icon),
+            icon,
             contentDescription = description,
             modifier = Modifier.size(22.dp),
             tint = TextColor.copy(alpha = alpha.icon)

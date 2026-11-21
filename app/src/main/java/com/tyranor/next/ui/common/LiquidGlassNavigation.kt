@@ -2,6 +2,7 @@ package com.tyranor.next.ui.common
 
 import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -56,7 +57,9 @@ import com.tyranor.next.theme.glassEdgeStroke
 @Immutable
 data class LiquidGlassNavItem(
     val label: String,
-    @DrawableRes val iconRes: Int,
+    @DrawableRes val iconRes: Int = 0,
+    val icon: ImageVector? = null,
+    val unselectedIcon: ImageVector? = null,
 )
 
 /**
@@ -233,30 +236,7 @@ fun effectiveNavStyle(): String {
  */
 @Composable
 fun glassNavBottomInset(): Dp {
-    // 平板侧栏：导航在侧边且占布局宽度，底部不需要留白
-    if (isSideRailLayout()) return 0.dp
-    val navStyle = effectiveNavStyle()
-    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    return when (navStyle) {
-        AppSettingsStore.NAV_STYLE_LIQUID_GLASS_ENHANCED -> {
-            // 窗口窄到组件自己不渲染时不能留白，否则底部会空出一条
-            val spec = GlassBottomBarSpec.Default
-            val density = LocalDensity.current
-            val windowWidthDp = with(density) {
-                LocalWindowInfo.current.containerSize.width.toDp()
-            }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenWidthDp.dp
-            when {
-                // 窗口窄到组件自己不渲染时不能留白，否则底部会空出一条
-                !spec.canRender(windowWidthDp) -> 0.dp
-                // 运行期 AGSL 不可用时 MainScreen 会退回经典档，留白必须跟着按经典档算
-                !GlassShaderSupport.isRuntimeShaderUsable -> navBarInset + 88.dp
-                else -> navBarInset + spec.hostBottomInset()
-            }
-        }
-        // 经典档：栏高 64 + 上下各 12
-        AppSettingsStore.NAV_STYLE_LIQUID_GLASS -> navBarInset + 88.dp
-        // 悬浮按钮：收起态按钮 64 + 底部 16 外边距 + 8 余量（与玻璃系一致）
-        AppSettingsStore.NAV_STYLE_FLOATING_BUTTON -> navBarInset + 88.dp
-        else -> if (AppThemeColors.isGlass) navBarInset + 88.dp else 0.dp
-    }
+    // Material 3 导航栏（底部 NavigationBar / 平板 NavigationRail）始终占布局高度，
+    // 页面内容不需要额外的底部留白。
+    return 0.dp
 }

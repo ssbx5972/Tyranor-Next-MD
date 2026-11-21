@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.save
 
+import com.tyranor.next.ui.common.AppIcons
+
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
@@ -59,12 +61,12 @@ import com.tyranor.next.ui.common.toSaveSyncMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.DropdownEntry
-import top.yukonga.miuix.kmp.basic.DropdownItem
+import com.tyranor.next.ui.common.M3Card as MiuixCard
 import com.tyranor.next.ui.common.ArrowPreference
+import com.tyranor.next.ui.common.DropdownEntry
+import com.tyranor.next.ui.common.DropdownItem
 import com.tyranor.next.ui.common.OverlayDropdownPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -441,7 +443,7 @@ private fun SaveCloudVersionsPanel(
                     },
                     onSearch = { saveIdentity() },
                     imeAction = ImeAction.Done,
-                    leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                    leadingIconVector = AppIcons.rename,
                     iconContentDescription = stringResource(R.string.save_sync_identity),
                     textStyle = MaterialTheme.typography.bodyMedium,
                 )

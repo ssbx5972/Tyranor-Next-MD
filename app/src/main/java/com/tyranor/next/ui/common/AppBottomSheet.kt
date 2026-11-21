@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.ModalBottomSheetProperties
@@ -102,17 +104,12 @@ internal fun AppBottomSheet(
         // 与统一弹窗共用最大宽度，避免横屏/大屏拉伸过宽
         sheetMaxWidth = AppDialogMaxWidth,
         sheetGesturesEnabled = false,
-        // 复古玻璃用不透明面板色；白雾玻璃面板本身透明，由下方 Box 叠底图 + 白纱成面
-        containerColor = when {
-            AppThemeColors.isGlass -> GlassPanelSolid
-            AppThemeColors.isMilkGlass -> Color.Transparent
-            else -> PageGrey
-        },
-        contentColor = TextColor,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = controller.nativeScrim(SheetScrimColor),
         contentWindowInsets = { WindowInsets(0.dp) },
-        // 顶部圆角与组件统一圆角保持一致
-        shape = AppSheetTopShape,
+        // Material 3 底部抽屉：extraLarge 顶部圆角；把手由内容顶部的 AppSheetDragHandle 绘制
+        shape = MaterialTheme.shapes.extraLarge,
         dragHandle = null,
     ) {
         controller.BindWindowScrim(SheetScrimColor)
@@ -124,10 +121,7 @@ internal fun AppBottomSheet(
         )
         MotionSheetEffects(controller, onDismissRequest)
         ProvideEntrance {
-            Box(Modifier.fillMaxWidth().skipEntranceOnDrag().motionSheetDrag(controller).clip(AppSheetTopShape)) {
-                if (AppThemeColors.isMilkGlass) {
-                    MilkGlassPanelBackground(Modifier.matchParentSize())
-                }
+            Box(Modifier.fillMaxWidth().skipEntranceOnDrag().motionSheetDrag(controller).clip(MaterialTheme.shapes.extraLarge)) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

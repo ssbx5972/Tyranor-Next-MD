@@ -83,6 +83,7 @@ import com.tyranor.next.theme.NoticeLightCapsuleFailure
 import com.tyranor.next.theme.NoticeDarkCapsuleBackground
 import com.tyranor.next.theme.NoticeDarkCapsuleContent
 import com.tyranor.next.theme.NoticeDarkCapsuleFailure
+import com.tyranor.next.ui.common.AppIcons
 import com.tyranor.next.ui.common.isTabletScreen
 import com.tyranor.next.ui.common.motion.BlurCrossfade
 import com.tyranor.next.ui.common.motion.MotionMode
@@ -354,18 +355,18 @@ private fun NoticeSurface(modifier: Modifier, draw: NoticeDrawing, last: Notice)
 /** 胶囊里的一条内容：图标 + 文字（随胶囊的深浅取色）。 */
 @Composable
 private fun NoticeRow(notice: Notice, colors: NoticeColors) {
-    val (iconRes, tint) = when (notice.kind) {
-        AppNotice.Kind.Success -> R.drawable.ic_notice_success to colors.content
-        AppNotice.Kind.Failure -> R.drawable.ic_notice_failure to colors.failure
-        AppNotice.Kind.Limit -> R.drawable.ic_notice_limit to colors.content.copy(alpha = 0.78f)
-        else -> R.drawable.ic_notice_info to colors.content
+    val (icon, tint) = when (notice.kind) {
+        AppNotice.Kind.Success -> AppIcons.success to colors.content
+        AppNotice.Kind.Failure -> AppIcons.error to colors.failure
+        AppNotice.Kind.Limit -> AppIcons.warning to colors.content.copy(alpha = 0.78f)
+        else -> AppIcons.info to colors.content
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(
-            painter = painterResource(iconRes),
+            imageVector = icon,
             contentDescription = null,
             tint = tint,
             modifier = Modifier.size(20.dp),

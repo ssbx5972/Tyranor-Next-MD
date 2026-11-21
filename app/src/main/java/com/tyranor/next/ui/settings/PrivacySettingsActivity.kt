@@ -51,8 +51,8 @@ import com.tyranor.next.ui.common.privacy.isDeviceCredentialUsable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 
 /** 隐私设置：防止截图 / 隐藏通知内容 / 应用锁。 */
 class PrivacySettingsActivity : AppScreenActivity() {

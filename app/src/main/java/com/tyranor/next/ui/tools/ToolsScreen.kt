@@ -23,6 +23,8 @@ import com.tyranor.next.R
 import com.tyranor.next.core.game.launch.EngineLauncher
 import com.tyranor.next.ui.archive.ArchiveUnpackActivity
 import com.tyranor.next.theme.MiuixSettingsTheme
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.tyranor.next.ui.common.AppIcons
 import com.tyranor.next.ui.common.SettingsEntryCard
 import com.tyranor.next.ui.common.AppTopBar
 import com.tyranor.next.ui.common.LaunchErrorDialog
@@ -41,7 +43,7 @@ import kotlinx.coroutines.withContext
 
 private data class ToolEntry(
     @StringRes val title: Int,
-    @DrawableRes val icon: Int,
+    val icon: ImageVector,
     val onClick: () -> Unit,
 )
 
@@ -52,7 +54,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
     var launchError by remember { mutableStateOf<LaunchErrorState?>(null) }
     var launchingNative by remember { mutableStateOf(false) }
     val entries = listOf(
-        ToolEntry(R.string.side_panel_kr2_native_title, R.drawable.ic_settings_engine) {
+        ToolEntry(R.string.side_panel_kr2_native_title, AppIcons.memory) {
             if (!launchingNative) {
                 launchingNative = true
                 scope.launch {
@@ -67,19 +69,19 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                 }
             }
         },
-        ToolEntry(R.string.side_panel_archive_tool_title, R.drawable.ic_sheet_archive) {
+        ToolEntry(R.string.side_panel_archive_tool_title, AppIcons.archive) {
             startActivityWithPageTransition(context, ArchiveUnpackActivity.createIntent(context))
         },
-        ToolEntry(R.string.webdav_title, R.drawable.ic_save_cloud) {
+        ToolEntry(R.string.webdav_title, AppIcons.cloud) {
             startActivityWithPageTransition(context, WebDavSettingsActivity.createIntent(context))
         },
-        ToolEntry(R.string.side_panel_input_tool_title, R.drawable.ic_input_gamepad) {
+        ToolEntry(R.string.side_panel_input_tool_title, AppIcons.gamepad) {
             startActivityWithPageTransition(context, InputSettingsActivity.createIntent(context))
         },
-        ToolEntry(R.string.side_panel_engine_module_title, R.drawable.ic_engine_manage) {
+        ToolEntry(R.string.side_panel_engine_module_title, AppIcons.extension) {
             startActivityWithPageTransition(context, EngineModuleManagementActivity.createIntent(context))
         },
-        ToolEntry(R.string.privacy_settings_title, R.drawable.ic_settings_privacy) {
+        ToolEntry(R.string.privacy_settings_title, AppIcons.lock) {
             startActivityWithPageTransition(context, PrivacySettingsActivity.createIntent(context))
         },
     )
@@ -94,7 +96,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                 itemsIndexed(entries, key = { _, entry -> entry.title }) { index, entry ->
                     SettingsEntryCard(
                         title = stringResource(entry.title),
-                        iconRes = entry.icon,
+                        icon = entry.icon,
                         modifier = Modifier.staggeredEntrance(index),
                         enabled = index != 0 || !launchingNative,
                         onClick = entry.onClick,

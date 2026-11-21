@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.runtime
 
+import com.tyranor.next.ui.common.AppIcons
+
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Arrangement
@@ -64,9 +66,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 import android.widget.Toast
 
 /** Dynamic, per-game settings declared by a bound third-party runtime module. */
@@ -271,7 +273,7 @@ fun RuntimeModuleSettingsScreen(game: ScanGame) {
                         contentColor = PageTextColor,
                         trailing = {
                             if (dirty && bindingValid && descriptorConfirmed && !saveRunning && !descriptionConflict) TopBarIcon(
-                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_save),
+                                icon = AppIcons.save,
                                 contentDescription = stringResource(R.string.runtime_settings_save),
                                 tint = MiuixTheme.colorScheme.primary,
                                 onClick = { if (!saveRunning && !loading && bindingValid && !descriptionConflict) scope.launch { saveDraft() } },

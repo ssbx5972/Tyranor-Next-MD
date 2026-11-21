@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.home
 
+import com.tyranor.next.ui.common.AppIcons
+
 import com.tyranor.next.ui.game.openPerGameSettingsFromSheet
 import com.tyranor.next.ui.game.removeLibraryGame
 import com.tyranor.next.ui.game.removeRecentGame
@@ -194,7 +196,7 @@ fun HomeScreen(
                 title = stringResource(R.string.nav_home),
                 trailing = {
                     TopBarIcon(
-                        painterResource(R.drawable.ic_refresh),
+                        AppIcons.refresh,
                         stringResource(R.string.home_web_refresh_content_description),
                         MaterialTheme.colorScheme.primary,
                         spin = true,
@@ -644,7 +646,7 @@ private fun QuickLaunchCard(
                 }
                 // 封面右侧的指向箭头，仅作视觉引导，不单独响应点击；左侧与封面间距 9dp
                 Icon(
-                    painter = painterResource(R.drawable.ic_quick_launch_arrow),
+                    imageVector = AppIcons.forward,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier

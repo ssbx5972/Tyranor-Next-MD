@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.game
 
+import com.tyranor.next.ui.common.AppIcons
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,7 +51,7 @@ internal fun AddGameDialog(
                     modifier = Modifier.staggeredEntrance(0),
                     title = stringResource(R.string.game_add_pc),
                     summary = stringResource(R.string.game_add_pc_summary),
-                    leadingIcon = R.drawable.ic_sheet_pc,
+                    leadingIconVector = AppIcons.pc,
                     containerColor = DialogItemSurface,
                     indication = null,
                     onClick = { exitHandle.closeThen(onAddPc) },
@@ -58,7 +60,7 @@ internal fun AddGameDialog(
                     modifier = Modifier.staggeredEntrance(1),
                     title = stringResource(R.string.game_add_android),
                     summary = stringResource(R.string.game_add_android_summary),
-                    leadingIcon = R.drawable.ic_sheet_phone,
+                    leadingIconVector = AppIcons.phone,
                     containerColor = DialogItemSurface,
                     indication = null,
                     onClick = { exitHandle.closeThen(onAddAndroid) },

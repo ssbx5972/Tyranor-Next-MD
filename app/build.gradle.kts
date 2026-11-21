@@ -591,10 +591,7 @@ dependencies {
   implementation(libs.appauth)
   implementation(libs.okhttp)
 
-  // Miuix 组件库（设置页 Card + Preference 体系）
-  implementation(libs.miuix.ui)
-  implementation(libs.miuix.preference)
-  // 液态玻璃导航（圆角流体玻璃底部导航，参考 RinneMobile）
+  // 液态玻璃相关历史组件仍被部分动效状态复用（界面本身已统一 Material 3）
   implementation(libs.backdrop)
   // 首启解压 assets/nativeplugins/<engine>.zip.xz（LZMA2，构建期由 CompressXzArchive 生成）
   implementation(libs.xz)

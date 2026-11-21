@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -426,24 +427,15 @@ internal fun AppAlertDialog(
                         .fillMaxWidth()
                         // 为超框内容留出卡片上沿空间；padding 在 Card 背景之外，表面仍从下方开始
                         .padding(top = topOverhangHeight)
-                        .nestedPanelDim(window = { dialogWindow[0] }, shape = AppComponentShape)
-                        .glassBorder(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        .nestedPanelDim(window = { dialogWindow[0] }, shape = MaterialTheme.shapes.extraLarge),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     colors = CardDefaults.cardColors(
-                        // 复古玻璃用高不透明度深色面板；白雾玻璃用页面底图 + 白纱的面板层
-                        containerColor = when {
-                            AppThemeColors.isGlass -> GlassPanel
-                            AppThemeColors.isMilkGlass -> Color.Transparent
-                            else -> NavWhite
-                        },
-                        contentColor = TextColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                     ),
-                    shape = AppComponentShape,
+                    shape = MaterialTheme.shapes.extraLarge,
                 ) {
-                    Box(Modifier.fillMaxWidth().clip(AppComponentShape)) {
-                        if (AppThemeColors.isMilkGlass) {
-                            MilkGlassPanelBackground(Modifier.matchParentSize())
-                        }
+                    Box(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.extraLarge)) {
                         // 仅为弹窗子组件提供取色上下文，使输入框与标签指示器和面板形成反差；
                         // 不把弹窗条目色扩展到页内组件，也不由页面调用方覆盖公共组件颜色。
                         CompositionLocalProvider(LocalAppDialogContent provides true) {

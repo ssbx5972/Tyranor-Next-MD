@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import com.tyranor.next.ui.common.motion.BlurCrossfade
 import com.tyranor.next.ui.common.motion.ExpandVisibility
 import com.tyranor.next.ui.common.motion.PressSquishDefaults
@@ -48,9 +50,9 @@ import com.tyranor.next.theme.MiuixSettingsTheme
 import com.tyranor.next.ui.common.AppSecondaryTopBar
 import com.tyranor.next.ui.common.NoRippleTextButton
 import com.tyranor.next.ui.common.TopBarIcon
-import top.yukonga.miuix.kmp.basic.Scaffold
+import com.tyranor.next.ui.common.M3Scaffold as Scaffold
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 /** Ruffle 外置模块全局设置：模块安装状态 + SWF 渲染参数，由顶部保存按钮统一落盘。 */
@@ -79,7 +81,7 @@ internal fun RuffleSettingsScreen() {
                     contentColor = PageTextColor,
                     trailing = {
                         TopBarIcon(
-                            painterResource(R.drawable.ic_save),
+                            AppIcons.save,
                             stringResource(R.string.engine_settings_save_content_description),
                             MiuixTheme.colorScheme.primary,
                         ) {

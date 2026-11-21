@@ -1,6 +1,7 @@
 package com.tyranor.next.theme
 
 import android.content.Context
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import com.tyranor.next.core.settings.AppSettingsStore
 import com.tyranor.next.core.settings.AppearanceStyle
 import com.tyranor.next.core.theme.ThemeColorPayload
 import com.tyranor.next.core.theme.ThemeColorPayloadStore
+import com.tyranor.next.theme.m3.M3Palette
 
 /**
  * 全局主题色：读写 AppSettingsStore，变化时通过 snapshot state 通知所有已组合页面
@@ -19,6 +21,19 @@ object AppThemeColors {
     private var loaded = false
     var primary by mutableStateOf(Blue40)
         private set
+
+    /**
+     * 当前 Material 3 配色方案快照：由 TyranorNextTheme 在组合期发布。
+     * theme/Color.kt 的兼容色 getter 与所有颜色组件都从这里取色，
+     * 保证主题色 / 深浅色切换时全 App 同步。
+     */
+    var scheme by mutableStateOf(M3Palette.colorScheme(Blue40, false))
+        private set
+
+    /** 主题组合树发布新方案；同一方案（引用相同）时不触发重组。 */
+    fun publishScheme(value: ColorScheme) {
+        if (scheme !== value) scheme = value
+    }
 
     /** 深色模式（应用设置「外观模式」）；变化时全 App 重组。 */
     var isDark by mutableStateOf(false)
@@ -81,13 +96,11 @@ object AppThemeColors {
     }
 
     /** 从存储重读主题色与外观风格并广播变更（system 模式按系统当前深/浅解析）。
-     *  复古玻璃固定深色；白雾玻璃固定浅色（条目为亮面黑字），两者都禁用深浅色切换。 */
+     *  界面已统一为 Material 3：历史玻璃外观设置一律归为 DEFAULT，不再参与配色。 */
     fun refresh(context: Context) {
-        appearanceStyle = AppSettingsStore.getAppearanceStyle(context)
+        appearanceStyle = AppearanceStyle.DEFAULT
         primary = parseColorHex(AppSettingsStore.getThemeColorHex(context))
         isDark = when {
-            appearanceStyle.isGlass -> true
-            appearanceStyle.isMilkGlass -> false
             AppSettingsStore.getThemeMode(context) == AppSettingsStore.THEME_MODE_SYSTEM ->
                 // 跟随系统：直接读系统全局配置（始终是最新的，不依赖可能过期的包装 context）；换皮过渡期间保持旧值
                 systemDarkHold ?: systemIsDark(context)

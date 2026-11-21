@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,8 +31,8 @@ import com.tyranor.next.theme.MiuixSettingsTheme
 import com.tyranor.next.ui.common.AppSecondaryTopBar
 import com.tyranor.next.ui.common.TopBarIcon
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.ui.common.M3Scaffold as Scaffold
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 @Composable
@@ -67,7 +69,7 @@ internal fun CmvsSettingsScreen() {
                     contentColor = PageTextColor,
                     trailing = {
                         TopBarIcon(
-                            painterResource(R.drawable.ic_save),
+                            AppIcons.save,
                             stringResource(R.string.engine_settings_save_content_description),
                             MiuixTheme.colorScheme.primary,
                         ) {

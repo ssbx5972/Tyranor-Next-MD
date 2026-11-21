@@ -1,25 +1,25 @@
 package com.tyranor.next.ui.common
 
-import android.os.Build
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import com.tyranor.next.ui.common.motion.bounceOnChange
 import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -28,38 +28,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.tyranor.next.R
-import com.tyranor.next.theme.MiuixSettingsTheme
-import com.tyranor.next.theme.glassBorder
-import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.SearchBar
-import top.yukonga.miuix.kmp.basic.SearchBarDefaults
-import top.yukonga.miuix.kmp.theme.LocalContentColor
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * Miuix 风格统一搜索/单行输入框（非展开内嵌式）。
- *
- * 统一规范（详见 AGENTS.md「搜索/输入框统一规范」）：
- * - 全 App 的搜索过滤框与弹窗内单行文本输入一律使用本组件，禁止直接拼装 Miuix
- *   `SearchBar`/`InputField`，禁止使用 Material 的 `TextField`/`OutlinedTextField`。
- * - 前导图标固定 26dp、tint 取 `MiuixTheme.colorScheme.primary`、内边距取
- *   `SearchBarDefaults.LeadingIcon*`，均由组件内部处理，调用方不要传色值/尺寸。
- * - `expanded` 恒为 false（非展开内嵌式），不使用展开式全屏搜索页形态。
- * - API 26/27、非恒等文本变换或显式键盘/IME/autofill 语义由 `EmbeddedSearchInputField`
- *   兼容；默认参数组合仍走 Miuix `InputField`。
+ * 统一搜索 / 单行输入框：Material 3 OutlinedTextField（胶囊形、filled 容器色）。
  *
  * @param query 输入内容，状态由调用方持有
- * @param onQueryChange 输入变化回调（即时过滤场景在此更新过滤条件）
- * @param onSearch 键盘 IME 动作回调；即时过滤场景可不传（默认空实现）
- * @param leadingIcon 前导图标 drawable；null 用默认搜索图标，非搜索语义必须传对应图标
- * @param iconContentDescription 输入框的无障碍标签（兼容旧参数名；同时作为输入 label，并非只描述前导图标）
- * @param textStyle 输入文字样式；null 用 miuix 默认 `main`（17sp），需要其他字号可传（如弹窗场景传 `bodyMedium`）
- * @param visualTransformation 文本变换（如密码掩码 `PasswordVisualTransformation`）；默认恒等变换。
- *   非恒等变换只表示需要内嵌渲染，并不自动推断安全身份或 autofill 类型；清空按钮仍按原文判断与清空
- * @param imeAction IME 动作；默认 `ImeAction.Search`，身份输入等非搜索场景应显式传 `ImeAction.Done`
- * @param autofillContentType Compose autofill 内容类型；默认 null。用户名/现有密码应分别传
- *   `ContentType.Username` / `ContentType.Password`，与键盘类型和 IME 动作分别声明
- * @param keyboardType 键盘类型；默认 `KeyboardType.Text`，URL 等字段按输入语义传 `KeyboardType.Uri`
+ * @param onQueryChange 输入变化回调
+ * @param onSearch 键盘 IME 搜索动作回调
+ * @param leadingIcon 前导图标；null 用默认搜索图标
+ * @param iconContentDescription 无障碍标签 / 占位提示
+ * @param textStyle 输入文字样式；null 用 bodyLarge
  */
 @Composable
 fun AppSearchField(
@@ -68,6 +46,7 @@ fun AppSearchField(
     modifier: Modifier = Modifier,
     onSearch: () -> Unit = { },
     leadingIcon: Painter? = null,
+    leadingIconVector: ImageVector? = null,
     iconContentDescription: String? = null,
     textStyle: TextStyle? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -75,87 +54,58 @@ fun AppSearchField(
     autofillContentType: ContentType? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
-    // Miuix InputField 无法表达文本变换、IME、键盘类型与 autofill；这些场景统一走内嵌实现。
-    val needsEmbeddedInput = visualTransformation != VisualTransformation.None ||
-        Build.VERSION.SDK_INT in Build.VERSION_CODES.O..Build.VERSION_CODES.O_MR1 ||
-        imeAction != ImeAction.Search ||
-        autofillContentType != null ||
-        keyboardType != KeyboardType.Text
-    val resolvedInputLabel = iconContentDescription
-        ?: androidx.compose.ui.res.stringResource(R.string.common_search_content_description)
-    // 聚焦反馈只缩放前导图标，编辑区域保持稳定：缩放 BasicTextField 会让行底的
-    // handle anchor 在可见边界处反复进出，导致独立 Popup 中的水滴柄闪烁。
-    // 提交（IME 搜索 / 完成）不加反馈：调用方在校验失败时自行 shakeOnTrigger，两者会冲突。「普通」档 bounceOnChange 不加节点。
-    var focused by remember { mutableStateOf(false) }
-    // 前导图标弹一下的计数：获得焦点 +1（初值 0 不弹）
-    var iconPulse by remember { mutableIntStateOf(0) }
-    val currentOnSearch by rememberUpdatedState(onSearch)
-    val submit: () -> Unit = remember {
+    val label = iconContentDescription
+        ?: stringResource(R.string.common_search_content_description)
+    val trailing: (@Composable () -> Unit)? = if (query.isNotEmpty()) {
         {
-            currentOnSearch()
+            IconButton(onClick = { onQueryChange("") }) {
+                Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(20.dp))
+            }
         }
+    } else {
+        null
     }
-    MiuixSettingsTheme {
-        // miuix 无 controller 的 MiuixTheme 重载不提供 LocalContentColor（默认黑色），
-        // InputField 内部强制以 LocalContentColor.current 作为输入文字颜色，
-        // 此处显式提供主题 onBackground（深色=白色系 / 浅色=深灰），保证深浅色下文字正确。
-        CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onBackground) {
-            SearchBar(
-                inputField = {
-                    val fieldModifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { state ->
-                            val now = state.hasFocus
-                            if (now && !focused) iconPulse++
-                            focused = now
-                        }
-                        .glassBorder(CircleShape)
-                        .semantics { contentDescription = resolvedInputLabel }
-                    val fieldLeadingIcon: @Composable () -> Unit = {
-                        Icon(
-                            modifier = Modifier
-                                .padding(start = SearchBarDefaults.LeadingIconStartPadding, end = SearchBarDefaults.LeadingIconEndPadding)
-                                // 获得焦点时图标弹一下，不改变文本及光标柄的坐标。
-                                .bounceOnChange(iconPulse, depth = 0.22f)
-                                .size(26.dp),
-                            painter = leadingIcon ?: painterResource(R.drawable.ic_game_search),
-                            tint = MiuixTheme.colorScheme.primary,
-                            contentDescription = null,
-                        )
-                    }
-                    if (needsEmbeddedInput) {
-                        // 兼容输入沿用 Miuix 配色、胶囊与玻璃材质；默认参数组合仍走原 InputField。
-                        EmbeddedSearchInputField(
-                            query = query,
-                            onQueryChange = onQueryChange,
-                            onSearch = submit,
-                            textStyle = textStyle ?: MiuixTheme.textStyles.main,
-                            leadingIcon = fieldLeadingIcon,
-                            modifier = fieldModifier,
-                            visualTransformation = visualTransformation,
-                            keyboardType = keyboardType,
-                            imeAction = imeAction,
-                            autofillContentType = autofillContentType,
-                        )
-                    } else {
-                        InputField(
-                            query = query,
-                            onQueryChange = onQueryChange,
-                            onSearch = { submit() },
-                            textStyle = textStyle ?: MiuixTheme.textStyles.main,
-                            expanded = false,
-                            onExpandedChange = { },
-                            leadingIcon = fieldLeadingIcon,
-                            // 描边位于 InputField 胶囊上，而不是外层 SearchBar 的布局间距。
-                            modifier = fieldModifier,
-                        )
-                    }
-                },
-                expanded = false,
-                onExpandedChange = { },
-                modifier = modifier.fillMaxWidth(),
-                content = { },
-            )
-        }
-    }
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = label },
+        textStyle = textStyle ?: MaterialTheme.typography.bodyLarge,
+        placeholder = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+        leadingIcon = {
+            val iconModifier = Modifier.size(22.dp)
+            val tint = MaterialTheme.colorScheme.onSurfaceVariant
+            val vector = leadingIconVector ?: if (leadingIcon == null) AppIcons.search else null
+            if (vector != null) {
+                Icon(
+                    imageVector = vector,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = iconModifier,
+                )
+            } else {
+                Icon(
+                    painter = leadingIcon!!,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = iconModifier,
+                )
+            }
+        },
+        trailingIcon = trailing,
+        singleLine = true,
+        shape = CircleShape,
+        visualTransformation = visualTransformation,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardActions = KeyboardActions(onSearch = { onSearch() }, onDone = { onSearch() }),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = Color.Transparent,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+    )
 }

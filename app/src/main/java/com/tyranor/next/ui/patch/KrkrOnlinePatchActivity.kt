@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.patch
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -162,7 +164,7 @@ private fun KrkrOnlinePatchScreen(game: ScanGame) {
             trailing = {
                 // 拉取索引期间刷新图标缓缓明灭（包一层不改尺寸的 Box，静止时与原样一致）
                 Box(Modifier.breathing(loading)) {
-                    TopBarIcon(painterResource(R.drawable.ic_refresh), stringResource(R.string.patch_refresh_content_description), MaterialTheme.colorScheme.primary, spin = true) {
+                    TopBarIcon(AppIcons.refresh, stringResource(R.string.patch_refresh_content_description), MaterialTheme.colorScheme.primary, spin = true) {
                         loadIndex()
                     }
                 }

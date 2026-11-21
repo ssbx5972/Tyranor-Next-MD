@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.runtime
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,10 +64,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 import com.tyranor.next.ui.common.motion.DelayedProgress
 
@@ -242,7 +244,7 @@ internal fun EngineModuleManagementScreen() {
                                 .breathing(refreshing),
                         ) {
                             TopBarIcon(
-                                painterResource(R.drawable.ic_game_scan),
+                                AppIcons.scan,
                                 stringResource(R.string.engine_module_management_refresh),
                                 MiuixTheme.colorScheme.primary,
                                 spin = true,
@@ -317,7 +319,7 @@ internal fun EngineModuleManagementScreen() {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 // 空态内部再错开：图标先、说明文字后（随整块入场叠加，停稳即原样）
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_module),
+                                    imageVector = AppIcons.memory,
                                     contentDescription = null,
                                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                     modifier = Modifier

@@ -36,10 +36,9 @@ import com.tyranor.next.theme.glassBorder
 import com.tyranor.next.ui.common.AppBottomSheet
 import com.tyranor.next.ui.common.NoRippleButton
 import com.tyranor.next.ui.common.SlidingTabRow
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.CardDefaults
+import com.tyranor.next.ui.common.M3Card as MiuixCard
 import com.tyranor.next.ui.common.OverlayDropdownPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 
 /**
  * 游戏页「筛选与排序」抽屉。
@@ -137,11 +136,6 @@ internal fun GameFilterSheet(
                             scrollable = true,
                             scrollResetKey = scrollResetKey,
                         )
-                        MiuixSettingsTheme {
-                            // Miuix 下拉选项默认 body1=16sp；本抽屉按页面两档制收为 15sp。
-                            MiuixTheme(textStyles = MiuixTheme.textStyles.copy(
-                                body1 = TextStyle(fontSize = MaterialTheme.typography.titleMedium.fontSize),
-                            )) {
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(horizontal = FilterSheetInset),
                                     verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -149,7 +143,7 @@ internal fun GameFilterSheet(
                                     MiuixCard(
                                         modifier = Modifier.fillMaxWidth().glassBorder(),
                                         cornerRadius = AppComponentCornerRadius,
-                                        colors = CardDefaults.defaultColors(color = cardColor),
+                                        containerColor = cardColor,
                                     ) {
                                         OverlayDropdownPreference(
                                             title = stringResource(R.string.game_filter_sort_section),
@@ -162,7 +156,7 @@ internal fun GameFilterSheet(
                                     MiuixCard(
                                         modifier = Modifier.fillMaxWidth().glassBorder(),
                                         cornerRadius = AppComponentCornerRadius,
-                                        colors = CardDefaults.defaultColors(color = cardColor),
+                                        containerColor = cardColor,
                                     ) {
                                         OverlayDropdownPreference(
                                             title = stringResource(R.string.game_filter_played_section),
@@ -173,8 +167,6 @@ internal fun GameFilterSheet(
                                         )
                                     }
                                 }
-                            }
-                        }
                         if (searchQuery.isNotBlank()) {
                             Text(
                                 stringResource(R.string.game_filter_reset_keeps_search),

@@ -14,16 +14,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.flow.first
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.tyranor.next.ui.common.motion.MotionMode
 import com.tyranor.next.ui.common.motion.MotionTokens
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
-import top.yukonga.miuix.kmp.basic.ProgressIndicatorDefaults
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 进度条画到多满时才播完成脉冲（与 value 弹簧的停止阈值无关，避免等尾巴）。 */
 private const val COMPLETE_PULSE_FILL = 0.995f
@@ -53,16 +53,20 @@ internal fun MotionLinearProgressIndicator(progress: Float?, modifier: Modifier 
         completePulse.animateTo(0f, MotionTokens.pop(0.001f), initialVelocity = COMPLETE_PULSE_KICK)
     }
     if (!MotionMode.enhanced || progress == null) {
-        LinearProgressIndicator(modifier = modifier, progress = progress)
+        if (progress == null) {
+            LinearProgressIndicator(modifier = modifier)
+        } else {
+            LinearProgressIndicator(progress = { progress }, modifier = modifier)
+        }
         return
     }
-    val foreground = MiuixTheme.colorScheme.primary
-    val background = MiuixTheme.colorScheme.secondaryContainer
+    val foreground = MaterialTheme.colorScheme.primary
+    val background = MaterialTheme.colorScheme.secondaryContainer
     Canvas(
         modifier = modifier
             .semantics { progressBarRangeInfo = ProgressBarRangeInfo(progress.coerceIn(0f, 1f), 0f..1f) }
             .fillMaxWidth()
-            .height(ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight)
+            .height(4.dp)
             .graphicsLayer {
                 val k = completePulse.value
                 if (k != 0f) scaleY = 1f + COMPLETE_PULSE_SCALE * k

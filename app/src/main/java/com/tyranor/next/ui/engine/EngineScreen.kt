@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.engine
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -142,8 +144,6 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.TabRow
-import top.yukonga.miuix.kmp.basic.TabRowDefaults
 import androidx.compose.ui.graphics.Color
 import android.widget.Toast
 import com.tyranor.next.ui.common.collectSettingAsState
@@ -440,7 +440,7 @@ fun EngineScreen(
                             // 弹窗正文内的条目在正文升起后再逐条落位（只改图层，停稳即原样）
                             modifier = Modifier.dialogEntryEntrance(index),
                             summary = stringResource(entry.summaryRes),
-                            leadingIcon = R.drawable.ic_engine_chip,
+                            leadingIconVector = AppIcons.memory,
                             containerColor = DialogItemSurface,
                         ) {
                             val action = {
@@ -497,7 +497,7 @@ fun EngineScreen(
                             summary = stringResource(
                                 if (installed) R.string.engine_emulator_installed else R.string.engine_emulator_not_installed,
                             ),
-                            leadingIcon = R.drawable.ic_engine_chip,
+                            leadingIconVector = AppIcons.memory,
                             containerColor = DialogItemSurface,
                         ) {
                             val action = {
@@ -572,11 +572,10 @@ private fun StorageOverviewCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_engine_storage),
+                    Icon(
+                        imageVector = AppIcons.storage,
                         contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp),
                     )
                     Text(

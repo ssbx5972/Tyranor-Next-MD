@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.game
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -814,7 +816,7 @@ private fun PlaySourceRow(
         },
         summaryMaxLines = Int.MAX_VALUE,
         onClick = if (busy) null else onClick,
-        leadingIcon = R.drawable.ic_play_status_source,
+        leadingIconVector = AppIcons.playStatus,
         // 弹窗条目自足禁用按压反馈（AGENTS.md 弹窗条目约定）
         indication = null,
         showArrow = true,
@@ -1015,7 +1017,7 @@ private fun PlayStatusPickDialog(
                                 null
                             },
                             onClick = if (writing || !optionsEnabled) null else ({ onPick(option.code) }),
-                            leadingIcon = R.drawable.ic_sheet_play_status,
+                            leadingIconVector = AppIcons.playStatus,
                             // 弹窗条目自足禁用按压反馈（AGENTS.md 弹窗条目约定）
                             indication = null,
                             // 点选即写入的「执行动作」条目：隐藏跳转箭头（AGENTS.md 功能跳转条目规范）
@@ -1036,7 +1038,7 @@ private fun PlayStatusPickDialog(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                             // 退场时保留按钮用于绘制，同时禁用点击。
                             enabled = !writing && onRetry != null,
-                            leadingIcon = painterResource(R.drawable.ic_game_scan),
+                            leadingIconVector = AppIcons.scan,
                             maxLines = 2,
                             onClick = displayRetry,
                         )
@@ -1046,7 +1048,7 @@ private fun PlayStatusPickDialog(
                     text = stringResource(R.string.game_play_status_unbind),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !writing,
-                    leadingIcon = painterResource(R.drawable.ic_sheet_delete),
+                    leadingIconVector = AppIcons.delete,
                     fillColor = DangerFill,
                     maxLines = 2,
                     onClick = onUnbind,
@@ -1178,7 +1180,7 @@ private fun SubjectBindDialog(
                         onQueryChange = { keyword = it },
                         onSearch = { search() },
                         imeAction = ImeAction.Search,
-                        leadingIcon = painterResource(R.drawable.ic_game_search),
+                        leadingIconVector = AppIcons.search,
                         iconContentDescription = stringResource(R.string.game_bind_subject_search),
                         textStyle = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.shakeOnTrigger(searchRejects, amplitude = 6.dp),
@@ -1236,7 +1238,7 @@ private fun SubjectBindDialog(
                                         titleMaxLines = 2,
                                         summary = candidate.detail.ifBlank { candidate.subtitle },
                                         onClick = if (searching || binding) null else ({ bind(candidate) }),
-                                        leadingIcon = R.drawable.ic_cover_source,
+                                        leadingIconVector = AppIcons.collections,
                                         // 弹窗条目自足禁用按压反馈（AGENTS.md 弹窗条目约定）
                                         indication = null,
                                         // 点选即绑定的「执行动作」条目：隐藏跳转箭头（AGENTS.md 功能跳转条目规范）

@@ -1,14 +1,14 @@
 package com.tyranor.next.ui.common
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +52,8 @@ fun AppTopBar(
     AppTopBarLayout(title, modifier, background, contentColor, underTitle, trailing)
 }
 
-/** 两类顶栏共用状态栏留白、标题排版与附加区布局。 */
+/** 两类顶栏共用的 Material 3 TopAppBar 布局（透明容器 + 页面背景透出）。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AppTopBarLayout(
     title: String,
@@ -63,32 +64,40 @@ internal fun AppTopBarLayout(
     trailing: (@Composable () -> Unit)?,
     leading: (@Composable () -> Unit)? = null,
 ) {
-    Column(modifier.fillMaxWidth().background(background)) {
-        Column(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                leading?.invoke()
+    Column(modifier.fillMaxWidth()) {
+        TopAppBar(
+            title = {
                 // 标题变化（如多选计数、切换分类）时模糊过渡；静态标题无动画。
-                // 页面入场：标题作为本屏第一个元素从下方轻轻弹入（仅当页面提供了入场节拍时生效，
-                // 切回标签页的快速入场同样适用；停稳后与原样一致）
                 BlurCrossfade(
                     targetState = title,
-                    modifier = Modifier.weight(1f).staggeredEntrance(0, distance = TopBarEntranceDistance),
+                    modifier = Modifier.fillMaxWidth().staggeredEntrance(0, distance = TopBarEntranceDistance),
                 ) { currentTitle ->
                     Text(
                         currentTitle,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
                         color = contentColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                trailing?.invoke()
-            }
-            underTitle?.invoke()
-        }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            navigationIcon = { leading?.invoke() },
+            actions = {
+                if (trailing != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) { trailing.invoke() }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = background,
+                titleContentColor = contentColor,
+                navigationIconContentColor = contentColor,
+                actionIconContentColor = contentColor,
+            ),
+        )
+        underTitle?.invoke()
     }
 }

@@ -217,23 +217,15 @@ private fun SidePanelWindow(
                         .width(SidePanelWidth)
                         // 消费面板区域点击，避免穿透到遮罩
                         .pointerInput(Unit) { detectTapGestures { } }
-                        .nestedPanelDim(window = { dialogWindow.value }, shape = AppComponentShape)
-                        .glassBorder(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        .nestedPanelDim(window = { dialogWindow.value }, shape = MaterialTheme.shapes.extraLarge),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = when {
-                            AppThemeColors.isGlass -> GlassPanel
-                            AppThemeColors.isMilkGlass -> Color.Transparent
-                            else -> NavWhite
-                        },
-                        contentColor = TextColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                     ),
-                    shape = AppComponentShape,
+                    shape = MaterialTheme.shapes.extraLarge,
                 ) {
-                    Box(Modifier.fillMaxWidth().clip(AppComponentShape)) {
-                        if (AppThemeColors.isMilkGlass) {
-                            MilkGlassPanelBackground(Modifier.matchParentSize())
-                        }
+                    Box(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.extraLarge)) {
                         // 顶部标题（水平居中）+ 功能条目区（条目之间统一间距）
                         // 每次打开时标题与条目区依次弹入
                         ProvideEntrance(rememberEntranceState()) {

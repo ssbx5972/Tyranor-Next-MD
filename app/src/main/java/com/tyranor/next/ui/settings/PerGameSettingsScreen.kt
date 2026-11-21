@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import com.tyranor.next.ui.common.motion.ExpandVisibility
 import com.tyranor.next.ui.common.motion.staggeredEntrance
 import com.tyranor.next.ui.common.motion.listItemMotion
@@ -93,11 +95,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.runInterruptible
 import org.json.JSONObject
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.OverlayDropdownPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.motion.rememberEntranceOrder
 import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.motion.BlurCrossfade
@@ -811,7 +813,7 @@ fun PerGameSettingsScreen(game: ScanGame) {
                     trailing = {
                         // 外包一层只为挂「弹一下」：Box 贴合图标尺寸，排版与原样一致
                         Box(Modifier.bounceOnChange(saveTick, depth = 0.1f)) {
-                        TopBarIcon(painterResource(R.drawable.ic_save), stringResource(R.string.common_save), MiuixTheme.colorScheme.primary) {
+                        TopBarIcon(AppIcons.save, stringResource(R.string.common_save), MiuixTheme.colorScheme.primary) {
                             save()
                             saveTick++
                             // 存档路径展示与实际生效设置同源：保存后按新值重解一次（磁盘 + DB 读，走 IO）。
@@ -1057,7 +1059,7 @@ fun PerGameSettingsScreen(game: ScanGame) {
                                         .breathing(active = artPatchRunning, minAlpha = 0.6f),
                                     title = stringResource(R.string.engine_settings_artemis_add_base_patch),
                                     summary = if (artPatchRunning) patchRunningSummary else stringResource(R.string.engine_settings_artemis_add_base_patch_summary),
-                                    leadingIcon = R.drawable.ic_artemis_patch,
+                                    leadingIconVector = AppIcons.build,
                                     containerColor = NavWhite,
                                     verticalPadding = 17.dp,
                                     onClick = if (artPatchRunning) null else {
@@ -1076,7 +1078,7 @@ fun PerGameSettingsScreen(game: ScanGame) {
                                         .breathing(active = artPatchRunning, minAlpha = 0.6f),
                                     title = stringResource(R.string.engine_settings_artemis_add_windows_env_patch),
                                     summary = if (artPatchRunning) patchRunningSummary else stringResource(R.string.engine_settings_artemis_add_windows_env_patch_summary),
-                                    leadingIcon = R.drawable.ic_artemis_patch,
+                                    leadingIconVector = AppIcons.build,
                                     containerColor = NavWhite,
                                     verticalPadding = 17.dp,
                                     onClick = if (artPatchRunning) null else {
@@ -2131,7 +2133,7 @@ private fun OverrideFontPreference(
                     AppNavItem(
                         modifier = Modifier.staggeredEntrance(1, distance = DIALOG_ITEM_RISE, stepMillis = DIALOG_ITEM_STEP_MILLIS),
                         title = stringResource(R.string.engine_settings_follow_global_with_value, globalLabel),
-                        leadingIcon = R.drawable.ic_font_bookmark,
+                        leadingIconVector = AppIcons.bookmark,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -2141,7 +2143,7 @@ private fun OverrideFontPreference(
                     AppNavItem(
                         modifier = Modifier.staggeredEntrance(2, distance = DIALOG_ITEM_RISE, stepMillis = DIALOG_ITEM_STEP_MILLIS),
                         title = followGameDefaultLabel,
-                        leadingIcon = R.drawable.ic_font_bookmark,
+                        leadingIconVector = AppIcons.bookmark,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -2151,7 +2153,7 @@ private fun OverrideFontPreference(
                     AppNavItem(
                         modifier = Modifier.staggeredEntrance(3, distance = DIALOG_ITEM_RISE, stepMillis = DIALOG_ITEM_STEP_MILLIS),
                         title = stringResource(R.string.engine_settings_select_font_file),
-                        leadingIcon = R.drawable.ic_font_bookmark,
+                        leadingIconVector = AppIcons.bookmark,
                         containerColor = DialogItemSurface,
                         indication = null,
                     ) {
@@ -2265,7 +2267,7 @@ private fun OverrideText(
                                     rejectTick++
                                 }
                             },
-                            leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                            leadingIconVector = AppIcons.rename,
                             iconContentDescription = label,
                             imeAction = ImeAction.Done,
                             keyboardType = keyboardType,

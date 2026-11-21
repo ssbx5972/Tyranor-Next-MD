@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -75,11 +77,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import com.tyranor.next.ui.common.M3Card as MiuixCard
+import com.tyranor.next.ui.common.M3Scaffold as MiuixScaffold
 import com.tyranor.next.ui.common.ArrowPreference
 import com.tyranor.next.ui.common.SwitchPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.tyranor.next.theme.compat.MiuixTheme
 import com.tyranor.next.ui.common.notice.AppNotice
 
 /**
@@ -702,7 +704,7 @@ private fun ProfileNameDialog(
                         query = value,
                         onQueryChange = { value = it },
                         onSearch = { onConfirm(value) },
-                        leadingIcon = painterResource(R.drawable.ic_sheet_rename),
+                        leadingIconVector = AppIcons.rename,
                         iconContentDescription = title,
                         imeAction = ImeAction.Done,
                         textStyle = MaterialTheme.typography.bodyMedium,

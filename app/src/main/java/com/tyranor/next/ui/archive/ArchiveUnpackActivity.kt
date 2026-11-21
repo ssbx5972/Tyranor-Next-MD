@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.archive
 
+import com.tyranor.next.ui.common.AppIcons
+
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -84,7 +86,7 @@ import com.tyranor.next.ui.common.motion.skipEntranceOnDrag
 import com.tyranor.next.ui.common.motion.pressSquish
 import com.tyranor.next.ui.common.motion.staggeredEntrance
 import com.tyranor.next.ui.common.Slider
-import top.yukonga.miuix.kmp.basic.SliderDefaults
+import com.tyranor.next.ui.common.SliderDefaults
 import kotlin.math.roundToInt
 import com.tyranor.next.ui.common.motion.rememberLastNonNull
 
@@ -452,7 +454,7 @@ private fun PackPane(vm: ArchiveViewModel, appContext: Context, onPickDir: () ->
                     text = if (vm.packDirName.isBlank()) stringResource(R.string.archive_pack_pick_dir)
                     else vm.packDirName,
                     enabled = !vm.working,
-                    leadingIcon = painterResource(R.drawable.ic_sheet_folder),
+                    leadingIconVector = AppIcons.folder,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onPickDir,
                 )
@@ -517,7 +519,7 @@ private fun DirStrip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_sheet_folder),
+            imageVector = AppIcons.folder,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp),

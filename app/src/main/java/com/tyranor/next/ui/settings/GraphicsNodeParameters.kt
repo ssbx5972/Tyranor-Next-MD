@@ -1,5 +1,7 @@
 package com.tyranor.next.ui.settings
 
+import com.tyranor.next.ui.common.AppIcons
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -157,7 +159,7 @@ private fun ScaleParameter(title: String, value: String, onChange: (String) -> U
             onSearch = { if (validScale(value) == null) shake++ },
             imeAction = androidx.compose.ui.text.input.ImeAction.Done,
             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
-            leadingIcon = androidx.compose.ui.res.painterResource(R.drawable.ic_graphics_parameters),
+            leadingIconVector = AppIcons.tune,
             iconContentDescription = title, textStyle = MaterialTheme.typography.bodyMedium)
         DialogTextButton(stringResource(R.string.graphics_filter_decrease), enabled = (validScale(value) ?: 1.0) > 0.25) {
             onChange(formatScale(((validScale(value) ?: 1.0) - 0.25).coerceAtLeast(0.25)))

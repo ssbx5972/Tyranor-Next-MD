@@ -166,109 +166,57 @@ val GlassOpticalWhite = Color(0xFFFFFFFF)
 /** 光学阴影与覆盖用的纯黑：透镜档透镜按压覆盖、按住时的高光/阴影本体。 */
 val GlassOpticalBlack = Color(0xFF000000)
 
-// 页面背景：随深色模式取深/浅；玻璃系风格透明（露出根部背景）
+// ===== Material 3 角色色（兼容旧调用点）=====
+// 旧代码按「页面背景 / 卡片 / 文字」三类取色；这里统一映射到 M3 的语义角色，
+// 全 App 随种子色与深浅色自动换色，不再存在玻璃风格分支。
+
+/** 页面背景：M3 background。 */
 val PageGrey: Color
-    get() = when {
-        AppThemeColors.isGlass || AppThemeColors.isMilkGlass -> Color.Transparent
-        AppThemeColors.isDark -> DarkGrey
-        else -> GreyLight
-    }
-// 卡片/导航栏背景：随深色模式取深/浅；复古玻璃为半透明深色玻璃面，白雾玻璃为半透明白纱
+    get() = AppThemeColors.scheme.background
+
+/** 卡片 / 导航栏容器：M3 surfaceContainer。 */
 val NavWhite: Color
-    get() = when {
-        AppThemeColors.isGlass -> GlassSurface
-        AppThemeColors.isMilkGlass -> MilkSurface
-        AppThemeColors.isDark -> LighterDark
-        else -> WhiteLight
-    }
-// 正文/标题文字色：随深色模式取深/浅；复古玻璃恒浅色，白雾玻璃恒深色
+    get() = AppThemeColors.scheme.surfaceContainer
+
+/** 正文 / 标题文字：M3 onSurface。 */
 val TextColor: Color
-    get() = when {
-        AppThemeColors.isGlass -> GlassText
-        AppThemeColors.isMilkGlass -> MilkText
-        AppThemeColors.isDark -> TextColorDark
-        else -> TextColorLight
-    }
-// 导航栏未选中图标/文字色：随深色模式取深/浅；复古玻璃固定浅灰，白雾玻璃用中灰
+    get() = AppThemeColors.scheme.onSurface
+
+/** 未选中图标 / 文字：M3 onSurfaceVariant。 */
 val UnselectedGrey: Color
-    get() = when {
-        AppThemeColors.isGlass -> GlassUnselected
-        AppThemeColors.isMilkGlass -> MilkTextSecondary
-        AppThemeColors.isDark -> UnselectedGreyDark
-        else -> UnselectedGreyLight
-    }
+    get() = AppThemeColors.scheme.onSurfaceVariant
 
-/**
- * 页面级前景色：顶栏标题、状态栏旁文字、页面空态等直接落在背景上的文字。
- * 白雾玻璃的条目正文仍是 [TextColor]（深色），两者分离，避免亮卡黑字与深底黑字混淆。
- */
+/** 页面级前景色（顶栏标题、空态文字）：M3 onBackground。 */
 val PageTextColor: Color
-    get() = when {
-        AppThemeColors.isMilkGlass -> MilkPageText
-        AppThemeColors.isGlass -> GlassText
-        AppThemeColors.isDark -> TextColorDark
-        else -> TextColorLight
-    }
+    get() = AppThemeColors.scheme.onBackground
 
-/** 页面级辅助文字：比 [PageTextColor] 低一档的透明度。 */
+/** 页面级辅助文字：M3 onSurfaceVariant。 */
 val PageSecondaryTextColor: Color
-    get() = when {
-        AppThemeColors.isMilkGlass -> MilkPageSecondary
-        AppThemeColors.isGlass -> GlassTextSecondary
-        AppThemeColors.isDark -> TextColorDark.copy(alpha = 0.72f)
-        else -> TextColorLight.copy(alpha = 0.6f)
-    }
+    get() = AppThemeColors.scheme.onSurfaceVariant
 
-/** 抽屉辅助文字：白雾玻璃的亮面板使用深色正文。 */
+/** 抽屉辅助文字：M3 onSurfaceVariant。 */
 val SheetSecondaryTextColor: Color
-    get() = if (AppThemeColors.isMilkGlass) TextColor else PageSecondaryTextColor
+    get() = AppThemeColors.scheme.onSurfaceVariant
 
-/** 卡片/弹窗内的次要说明文字：与所在面板表面匹配。 */
+/** 卡片 / 弹窗内次要说明文字：M3 onSurfaceVariant。 */
 val SecondaryTextColor: Color
-    get() = when {
-        AppThemeColors.isMilkGlass -> MilkTextSecondary
-        AppThemeColors.isGlass -> GlassTextSecondary
-        AppThemeColors.isDark -> TextColorDark.copy(alpha = 0.72f)
-        else -> TextColorLight.copy(alpha = 0.6f)
-    }
+    get() = AppThemeColors.scheme.onSurfaceVariant
 
-/** 抽屉遮罩：玻璃面板需要加深与页面之间的层次。 */
+/** 抽屉遮罩：M3 scrim，按 M3 建议的 32% 不透明度。 */
 val SheetScrimColor: Color
-    get() = Color.Black.copy(
-        alpha = when {
-            AppThemeColors.isGlass -> 0.6f
-            AppThemeColors.isMilkGlass -> 0.45f
-            else -> 0.32f
-        },
-    )
+    get() = AppThemeColors.scheme.scrim.copy(alpha = 0.32f)
 
 /** 首次使用教练层的统一遮罩色。 */
 val CoachOverlayScrim: Color = Color.Black.copy(alpha = 0.46f)
 
-/**
- * 条目右侧箭头色：与设置页 `ArrowPreference` 的箭头保持一致
- * （默认风格 = 40% 前景色；复古玻璃 = 60% 的 [GlassTextSecondary]；白雾玻璃 = 中灰）。
- */
+/** 条目右侧箭头：M3 onSurfaceVariant。 */
 val ItemChevronColor: Color
-    get() = when {
-        AppThemeColors.isGlass -> GlassTextSecondary.copy(alpha = 0.6f)
-        AppThemeColors.isMilkGlass -> MilkText.copy(alpha = 0.45f)
-        AppThemeColors.isDark -> Color(0x66FFFFFF)
-        else -> Color(0x66000000)
-    }
-// 弹窗内条目容器色：默认风格 = PageGrey（白底弹窗灰卡）；玻璃风格 = 对应亮玻璃面
-val DialogItemSurface: Color
-    get() = when {
-        AppThemeColors.isGlass -> GlassSurfaceHigh
-        AppThemeColors.isMilkGlass -> MilkItemOnPanel
-        else -> PageGrey
-    }
+    get() = AppThemeColors.scheme.onSurfaceVariant
 
-/** 封面底部信息条等小面积覆盖：白雾玻璃用更实的白纱，避免深色封面把文字吃掉。 */
+/** 弹窗内条目容器：M3 surfaceContainerHighest。 */
+val DialogItemSurface: Color
+    get() = AppThemeColors.scheme.surfaceContainerHighest
+
+/** 封面底部信息条等小面积覆盖：M3 surfaceContainerHigh（保持与 onSurface 正文的对比）。 */
 val NavWhiteOverlay: Color
-    get() = when {
-        AppThemeColors.isMilkGlass -> MilkSurfaceStrong
-        AppThemeColors.isGlass -> GlassSurface.copy(alpha = 0.9f)
-        AppThemeColors.isDark -> LighterDark.copy(alpha = 0.9f)
-        else -> WhiteLight.copy(alpha = 0.9f)
-    }
+    get() = AppThemeColors.scheme.surfaceContainerHigh
