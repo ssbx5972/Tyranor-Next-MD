@@ -1,0 +1,256 @@
+name: Sync upstream and publish MD release
+
+on:
+  schedule:
+    # 每 6 小时检查一次上游 Release（分钟错开，避免整点拥堵）
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: md-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  UPSTREAM_REPO: Weiss-UltimateSavior/Tyranor-Next
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find latest upstream release
+        id: up
+        run: |
+          set -euo pipefail
+          # Upstream publishes prereleases, so list releases instead of using /releases/latest.
+          tag=$(gh api "repos/${UPSTREAM_REPO}/releases?per_page=1" --jq '.[0].tag_name // empty')
+          if [ -z "$tag" ]; then
+            echo "::error::No upstream release found"
+            exit 1
+          fi
+          ver=$(printf '%s' "$tag" | grep -oE '[0-9]+(\.[0-9]+)+' | head -1 || true)
+          if [ -z "$ver" ]; then
+            echo "::error::Could not parse a version from upstream tag '$tag'"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+          if gh release view "md-$ver" >/dev/null 2>&1; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Already up to date
+        if: steps.up.outputs.up_to_date == 'true'
+        run: echo "md-${{ steps.up.outputs.version }} already exists; nothing to do."
+
+      - name: Configure git and fetch upstream
+        if: steps.up.outputs.up_to_date == 'false'
+        run: |
+          set -euo pipefail
+          git config user.name "Tyranor MD Sync"
+          git config user.email "md-sync@users.noreply.github.com"
+          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git" || true
+          git fetch upstream --tags --force
+
+      - name: Merge upstream release
+        id: merge
+        if: steps.up.outputs.up_to_date == 'false'
+        run: |
+          set -uo pipefail
+          tag="${{ steps.up.outputs.tag }}"
+          if git merge --no-edit --no-ff "refs/tags/${tag}"; then
+            echo "conflict=false" >> "$GITHUB_OUTPUT"
+          else
+            files=$(git diff --name-only --diff-filter=U | paste -sd ',' -)
+            git merge --abort || true
+            echo "conflict=true" >> "$GITHUB_OUTPUT"
+            echo "files=$files" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report merge conflict and stop
+        if: steps.merge.outputs.conflict == 'true'
+        run: |
+          echo "REPORTED=1" >> "$GITHUB_ENV"
+          title="Upstream ${{ steps.up.outputs.tag }} needs Material 3 adaptation"
+          body=$(cat <<EOF
+          The automatic sync could not merge upstream \`${{ steps.up.outputs.tag }}\` into this fork.
+
+          Conflicting files:
+          \`${{ steps.merge.outputs.files }}\`
+
+          The merge was aborted and \`main\` was left unchanged. Resolve the conflicts locally, port any new upstream UI to Material 3, then merge manually.
+          EOF
+          )
+          existing=$(gh issue list --state open --search "${title} in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          echo "::error::Merge conflict; stopping without publishing."
+          exit 1
+
+      - name: Material 3 guard
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        run: |
+          set +e
+          bash tools/check-m3-ui.sh > /tmp/m3-guard.log 2>&1
+          status=$?
+          cat /tmp/m3-guard.log
+          if [ $status -ne 0 ]; then
+            echo "REPORTED=1" >> "$GITHUB_ENV"
+            title="Material 3 guard failed for upstream ${{ steps.up.outputs.tag }}"
+            body=$(printf 'The merged tree contains non-Material-3 UI code after upstream `%s`.\n\n```\n%s\n```\n\n`main` was left unchanged. Port these parts to Material 3, then merge manually.\n' "${{ steps.up.outputs.tag }}" "$(cat /tmp/m3-guard.log)")
+            existing=$(gh issue list --state open --search "${title} in:title" --json number --jq '.[0].number // empty')
+            if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+            git reset --hard origin/main
+            echo "::error::Material 3 guard failed; stopping without publishing."
+            exit 1
+          fi
+
+      - name: Free disk space
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Set up JDK 17
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager --install \
+            "platforms;android-36" \
+            "platforms;android-37.0" \
+            "build-tools;36.0.0" \
+            "ndk;28.0.13004108" \
+            "cmake;3.22.1"
+          printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Configure signing
+        id: signing
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ] && [ -n "${ANDROID_KEYSTORE_PASSWORD:-}" ] && [ -n "${ANDROID_KEY_ALIAS:-}" ] && [ -n "${ANDROID_KEY_PASSWORD:-}" ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/md-release.jks"
+            {
+              echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/md-release.jks"
+              echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+              echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+              echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+            } >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Release signing secrets are not configured; the build will be validated but not published."
+          fi
+
+      - name: Build release APK
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Read app version
+        id: version
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        run: |
+          set -euo pipefail
+          out=$(./gradlew -q :app:printAppVersion --no-daemon | tail -1)
+          ver=$(printf '%s' "$out" | awk '{print $1}')
+          code=$(printf '%s' "$out" | awk '{print $2}')
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Push validated main
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
+
+      - name: Report missing signing secrets
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed != 'true'
+        run: |
+          echo "REPORTED=1" >> "$GITHUB_ENV"
+          title="Automatic MD releases are waiting for signing secrets"
+          body=$(cat <<EOF
+          \`main\` was updated with upstream \`${{ steps.up.outputs.tag }}\` and the release build validated, but no APK was published because the signing secrets are missing.
+
+          Add these repository secrets so future releases can update over previous ones:
+          - \`ANDROID_KEYSTORE_BASE64\` (base64 of your release keystore)
+          - \`ANDROID_KEYSTORE_PASSWORD\`
+          - \`ANDROID_KEY_ALIAS\`
+          - \`ANDROID_KEY_PASSWORD\`
+          EOF
+          )
+          existing=$(gh issue list --state open --search "${title} in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          echo "::warning::Skipped release publication because signing secrets are not configured."
+
+      - name: Publish GitHub release
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed == 'true'
+        run: |
+          set -euo pipefail
+          ver="${{ steps.version.outputs.version }}"
+          code="${{ steps.version.outputs.code }}"
+          sha=$(git rev-parse HEAD)
+          cat > "$RUNNER_TEMP/release-notes.md" <<EOF
+          Automated beta build from versionCode ${code}, commit ${sha}.
+
+          Material 3 edition：全部界面已重做为 Material 3 —— 由种子色生成完整配色（浅色 / 深色）、标准 M3 导航、顶栏、卡片、列表与控件，全部界面图标使用 Material Icons（选中 Filled / 未选中 Outlined）。功能与上游 Tyranor Next ${ver} 一致。
+
+          本项目（界面重做、图标替换、文档与发布）全由 AI 制作；底层引擎与核心功能来自上游 Tyranor Next 及其贡献者。
+
+          - APK：\`app-release.apk\`（arm64-v8a，Android 8.0+）
+          - 源码：https://github.com/${{ github.repository }}
+          - 上游：https://github.com/${UPSTREAM_REPO}
+          EOF
+          gh release create "md-${ver}" app/build/outputs/apk/release/app-release.apk \
+            --title "Tyranor Next MD ${ver}" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --prerelease
+
+      - name: Report unexpected failure
+        if: failure()
+        run: |
+          if [ "${REPORTED:-}" = "1" ]; then
+            echo "Failure was already reported above."
+            exit 0
+          fi
+          title="Automatic MD sync failed (run ${{ github.run_id }})"
+          body=$(printf 'The automatic upstream sync failed.\n\nRun: %s/%s/actions/runs/%s\n\nSee the job log for details. `main` was not changed unless the merge had already been pushed.\n' "${{ github.server_url }}" "${{ github.repository }}" "${{ github.run_id }}")
+          gh issue create --title "$title" --body "$body" || true

@@ -127,6 +127,33 @@ iOS版本计划中...  鸿蒙设备可使用卓易通安装
 
 CI 使用 JDK 17；还需 engine 的 Android 36 平台、Build Tools 37.0.0、NDK 28.0.13004108 与 CMake 3.22.1。Windows 使用 `./gradlew.bat`。JVM 回归运行 `./gradlew testDebugUnitTest --no-daemon`，完整检查命令与设备验收边界见 [AGENTS.md](AGENTS.md#构建)。普通 Gradle 构建使用已提交的运行库，不自动重编所有原生引擎。
 
+## 自动跟进上游版本
+
+仓库内的 [`.github/workflows/md-sync.yml`](.github/workflows/md-sync.yml) 每 6 小时检查一次上游 Release，也可以手动运行：
+
+- 没有新版本：直接结束
+- 合并干净：运行 Material 3 检查 → 构建 `app-release.apk` → 推送 `main` → 发布 `md-<版本>` Release（格式与上游一致）
+- 合并冲突、M3 检查失败或构建失败：**自动中止，不推送、不发布**，并创建/更新 issue 列出需要处理的文件
+- 上游新增的设置项如果沿用现有公共组件，会自动继承 M3 外观；如果引入了新的自定义 UI / Miuix 组件 / 非 Material 图标，工作流会停下来等待适配
+
+自动发布需要配置稳定的签名（否则每次 CI 生成的 APK 签名不同，无法覆盖安装）。在仓库 `Settings → Secrets and variables → Actions` 中添加：
+
+| Secret | 内容 |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | 释放密钥库的 base64 编码 |
+| `ANDROID_KEYSTORE_PASSWORD` | 密钥库密码 |
+| `ANDROID_KEY_ALIAS` | 密钥别名 |
+| `ANDROID_KEY_PASSWORD` | 密钥密码 |
+
+生成并编码密钥库：
+
+```bash
+keytool -genkeypair -v -keystore md-release.jks -alias md -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 md-release.jks > keystore.b64
+```
+
+未配置签名密钥时，工作流仍会合并并验证构建，但会跳过发布并创建提醒 issue。
+
 ## 目录结构
 
 ```
