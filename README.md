@@ -1,6 +1,8 @@
 <p align="center">
-  <img src="screenshots/m3-redesign/10-home-final.png" alt="Tyranor Next MD" width="360" />
+  <img src="screenshots/index1.png" alt="Tyranor NEXT" width="900" />
 </p>
+
+> **说明：本项目（Tyranor Next · Material 3 Edition）全由 AI 制作。** 界面重做、图标替换、文档与发布流程均由 AI 完成；底层引擎与核心功能来自上游 [Tyranor Next](https://github.com/Weiss-UltimateSavior/Tyranor-Next) 及其贡献者。
 
 # Tyranor Next · Material 3 Edition
 
