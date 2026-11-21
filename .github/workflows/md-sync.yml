@@ -5,6 +5,11 @@ on:
     # 每 6 小时检查一次上游 Release（分钟错开，避免整点拥堵）
     - cron: '17 */6 * * *'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run merge, guard and signed build, but skip push and release'
+        type: boolean
+        default: false
 
 concurrency:
   group: md-sync
@@ -46,7 +51,9 @@ jobs:
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$ver" >> "$GITHUB_OUTPUT"
-          if gh release view "md-$ver" >/dev/null 2>&1; then
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+          elif gh release view "md-$ver" >/dev/null 2>&1; then
             echo "up_to_date=true" >> "$GITHUB_OUTPUT"
           else
             echo "up_to_date=false" >> "$GITHUB_OUTPUT"
@@ -197,13 +204,13 @@ jobs:
           echo "code=$code" >> "$GITHUB_OUTPUT"
 
       - name: Push validated main
-        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false'
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && inputs.dry_run != true
         run: |
           set -euo pipefail
           git push origin HEAD:main
 
       - name: Report missing signing secrets
-        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed != 'true'
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed != 'true' && inputs.dry_run != true
         run: |
           echo "REPORTED=1" >> "$GITHUB_ENV"
           title="Automatic MD releases are waiting for signing secrets"
@@ -222,7 +229,7 @@ jobs:
           echo "::warning::Skipped release publication because signing secrets are not configured."
 
       - name: Publish GitHub release
-        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed == 'true'
+        if: steps.up.outputs.up_to_date == 'false' && steps.merge.outputs.conflict == 'false' && steps.signing.outputs.signed == 'true' && inputs.dry_run != true
         run: |
           set -euo pipefail
           ver="${{ steps.version.outputs.version }}"
@@ -243,6 +250,11 @@ jobs:
             --title "Tyranor Next MD ${ver}" \
             --notes-file "$RUNNER_TEMP/release-notes.md" \
             --prerelease
+
+      - name: Dry run completed
+        if: inputs.dry_run == true && success()
+        run: |
+          echo "Dry run: merge, M3 guard and signed release build succeeded; nothing was pushed or published."
 
       - name: Report unexpected failure
         if: failure()
